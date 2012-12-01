@@ -49,6 +49,16 @@ hostname. Finally it will look for *.__default.
 The third item will have .__default implicitely appended to the end. However, this is could create problems if
 your file names naturally have ```._``` in them, so be careful.
 
+If you don't specify a default file (either explicitely or implicitely), such as in the following:
+```
+/opt/my-duffel/
+    tmp/
+        one.txt._hostname1
+        one.txt._hostname2
+```
+
+then the file will not be put if it does not match one of the given hostnames.
+
 You can apply the same to directories as well:
 ```
 /opt/my-duffel/
