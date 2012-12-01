@@ -191,10 +191,45 @@ Metadata files undergo the same selection process as the other files. For exampl
 ```
 /opt/my-duffel/
     tmp/
-        _meta.json._nodename1
+        _meta.json._hostname1
         _meta.json.__default
         one.txt
 ```
+
+### Cascading Metadata
+
+When ```apply_to_contents``` or ```apply_recursively``` are set for a directory, we have to look at how the permissions for the directories
+lower in the tree are going to be set. For example:
+```
+/opt/my-duffel/
+    tmp/
+        _meta.json
+        one/
+            _meta.json
+            two.txt
+```
+
+With the first ```_meta.json``` having:
+```json
+{
+    ".": { "owner":"user1", "apply_recursively":true }
+}
+```
+
+and the second:
+```json
+{
+    ".":       { "owner":"user2", "apply_to_contents":true }
+    "two.txt": { "owner":"user3" }
+}
+```
+
+As with most (hopefully all, if I've designed this right) things in duffel, the most specific rule is what gets used. So in the above example
+this is how the permissions for each item would end up:
+
+* /tmp            -> owned by user1
+* /tmp/one/       -> owned by user2
+* /tmp/one/two.xt -> owned by user3
 
 ## License
 
