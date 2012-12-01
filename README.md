@@ -181,8 +181,9 @@ All directory objects (including the one for ".") can additionally have the foll
 
 * "apply_to_contents" (bool): Whether or not to apply the metadata parameters to the contents of the directory
 * "apply_recursively" (bool): Whether or not to apply the metadata parameters recursively (implies "apply_to_contents")
+* "delete_untracked"  (bool): Delete any files/folders in the directory which aren't explicitely put by duffel
 
-Both of these parameters default to false if not specified.
+All of these parameters default to false if not specified.
 
 ### Metadata files for specific nodes
 
