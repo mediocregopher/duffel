@@ -231,6 +231,31 @@ this is how the permissions for each item would end up:
 * /tmp/one/       -> owned by user2
 * /tmp/one/two.xt -> owned by user3
 
+## Special Folder Names
+
+There are special folder names you can use in the root of your duffel project which will map based on environment variables or even custom scripts.
+
+For example:
+```
+/opt/my-duffel/
+    tmp/
+        one.txt
+    _HOME/
+        two.txt
+```
+
+Given the above, if your ```$HOME``` environment variable is set to ```/home/user1```, then the final structure that duffel will put is:
+```
+/tmp/one.txt
+/home/user1/two.txt
+```
+
+**NOTE** You can only use the environment variable special syntax in the root of the duffel project, doing something like ```/tmp/_HOME```
+will not work.
+
+It will be possible to be able to script your own mappings, so you don't have to set a bunch of crap in your environment. I haven't
+worked out the deets on that yet though.
+
 ## License
 
 Copyright © 2012 Brian Picciano
