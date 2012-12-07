@@ -51,7 +51,7 @@
         (partial util/index-when hostname-matches)
         (partial util/index-when #(= "_default" %))))
 
-(defmulti explode-file list?)
+(defmulti explode-file seq?)
 (defmethod explode-file false [file-name]
     (let [spec-split-ret (host-specifier-split file-name)
           specifier      (last spec-split-ret)
