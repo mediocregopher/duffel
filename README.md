@@ -98,17 +98,17 @@ With the following directory structure:
 ```
 /opt/my-duffel/
     tmp/
-        one.txt._t
+        one.txt._tpl
 ```
 
-```one.txt._t``` will be parsed through a template engine (tbd which one) and placed as ```/tmp/one.txt```.
+```one.txt._tpl``` will be parsed through a template engine (tbd which one) and placed as ```/tmp/one.txt```.
 
 If you have:
 ```
 /opt/my-duffel/
     tmp/
-        one.txt._t._hostname1
-        one.txt._t.__default
+        one.txt._tpl._hostname1
+        one.txt._tpl.__default
 ```
 
 The first file will be parsed and placed if the machine's name is ```hostname1```, otherwise the second one will
@@ -119,7 +119,7 @@ You can also mix and match template files with non-template files:
 /opt/my-duffel/
     tmp/
         one.txt._hostname1
-        one.txt._t.__default
+        one.txt._tpl.__default
 ```
 
 The above will place the first file un-parsed if the machine's name is ```hostname1```, otherwise it will parse the
@@ -129,8 +129,8 @@ Another example:
 ```
 /opt/my-duffel/
     tmp/
-        one.txt._t._g_groupname1
-        one.txt._t._hostname1
+        one.txt._tpl._g_groupname1
+        one.txt._tpl._hostname1
         one.txt._hostname2
         one.txt.__default
 ```
