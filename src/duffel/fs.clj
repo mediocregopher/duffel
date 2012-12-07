@@ -121,6 +121,7 @@
     [file-map]
     (map #(narrow-group (val %)) file-map))
 
+(declare specify-files)
 (defn directory-consolidate
     "If file-struct has :dir-ls then it is a directory. Call specify-files
     on the value at :dir-ls, then cons the file-struct (with :dir-ls dissociated)
