@@ -51,21 +51,39 @@
         (partial util/index-when hostname-matches)
         (partial util/index-when #(= "_default" %))))
 
+(defmulti explode-file list?)
+(defmethod explode-file false [file-name]
+    (let [spec-split-ret (host-specifier-split file-name)
+          specifier      (last spec-split-ret)
+          ext-split-ret  (extension-split (first spec-split-ret))
+          extension      (last  ext-split-ret)
+          base-name      (first ext-split-ret)]
+    { :base-name base-name
+      :specifier specifier
+      :extension extension
+      :file-name file-name
+      :is-dir?   false    }))
+
+(defmethod explode-file true [dir]
+    (let [dir-name       (first dir)
+          dir-ls         (rest  dir)
+          spec-split-ret (host-specifier-split dir-name)
+          specifier      (last spec-split-ret)
+          ext-split-ret  (extension-split (first spec-split-ret))
+          extension      (last  ext-split-ret)
+          base-name      (first ext-split-ret)]
+    { :base-name base-name
+      :specifier specifier
+      :extension extension
+      :file-name dir-name
+      :dir-ls    dir-ls 
+      :is-dir?   true    }))
+
 (defn explode-files-in-list 
     "Take a list of filenames and turn them into file structs containing info
     about their real name, extension, and host specifier"
     [file-list]
-    (map #(
-        let [spec-split-ret (host-specifier-split %)
-              specifier      (last spec-split-ret)
-              ext-split-ret  (extension-split (first spec-split-ret))
-              extension      (last  ext-split-ret)
-              base-name      (first ext-split-ret)]
-        { :base-name base-name
-          :specifier specifier
-          :extension extension
-          :file-name %        }
-    ) file-list))
+    (map explode-file file-list))
 
 (defn remove-empty-file-structs
     "Looks through list of file structs and removes any with empty names"
@@ -103,6 +121,19 @@
     [file-map]
     (map #(narrow-group (val %)) file-map))
 
+(defn directory-consolidate
+    "If file-struct has :dir-ls then it is a directory. Call specify-files
+    on the value at :dir-ls, then cons the file-struct (with :dir-ls dissociated)
+    to the front."
+    [file-struct]
+    (if (contains? file-struct :dir-ls)
+        (cons (dissoc file-struct :dir-ls) (specify-files (file-struct :dir-ls)))
+        file-struct))
+
+(defn directory-recursion
+    [file-structs]
+    (map directory-consolidate file-structs))
+
 (defn specify-files 
     "Given a list of file names (presumably all in the same folder) goes and performs
     all the steps needed to narrow down which files we want to actually use for this
@@ -113,4 +144,5 @@
          (explode-files-in-list)
          (remove-empty-file-structs)
          (group-by-basename)
-         (narrow-groups)))
+         (narrow-groups)
+         (directory-recursion)))
