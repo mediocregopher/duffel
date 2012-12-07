@@ -147,3 +147,13 @@
          (group-by-basename)
          (narrow-groups)
          (directory-recursion)))
+
+(defn specify-tree
+    "Since specify-files expects simply a list of files, not a '(dir & files)
+    structure like tree returns, we have to hack it a bit to make it work as
+    expected"
+    [dir]
+    (->> (tree dir)
+         (list)
+         (specify-files)
+         (first)))
