@@ -134,7 +134,8 @@
 (defn chroot-tree
     [root dir-tree]
     "Makes sure that the entire tree is chrooted to a directory. The given directory
-    should not end in a /, unless it is just '/'"
+    should not end in a /. If you want to chroot to root itself (/) pass in a blank
+    string"
     (let [root-node  (first dir-tree)]
         (cons (assoc root-node :base-name root) (rest dir-tree))))
 
@@ -162,10 +163,10 @@
 
 (defn _tree-map
     [user-fn dir-tree abs local]
-    (let [ abs-a             (if (= abs "/") abs (append-slash abs))
-           new-dir-tree      (user-fn dir-tree abs-a local)
+    (let [ new-dir-tree      (user-fn dir-tree abs local)
            new-dir-tree-node (first new-dir-tree)
-           new-abs           (str abs-a (new-dir-tree-node :base-name))
+           new-dir-base-name (new-dir-tree-node :base-name)
+           new-abs           (append-slash (str abs   (new-dir-tree-node :base-name)))
            new-local         (append-slash (str local (new-dir-tree-node :full-name))) ]
         (map #(if (seq? %)
                   (_tree-map user-fn % new-abs new-local)
