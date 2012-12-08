@@ -61,7 +61,7 @@
     { :base-name base-name
       :specifier specifier
       :extension extension
-      :file-name file-name
+      :full-name file-name
       :is-dir?   false    }))
 
 (defmethod explode-file true [dir]
@@ -75,7 +75,7 @@
     { :base-name base-name
       :specifier specifier
       :extension extension
-      :file-name dir-name
+      :full-name dir-name
       :dir-ls    dir-ls 
       :is-dir?   true    }))
 
@@ -130,3 +130,52 @@
          (list)
          (specify-files)
          (first)))
+
+(defn chroot-tree
+    [root dir-tree]
+    "Makes sure that the entire tree is chrooted to a directory. The given directory
+    should not end in a /, unless it is just '/'"
+    (let [root-node  (first dir-tree)]
+        (cons (assoc root-node :base-name root) (rest dir-tree))))
+
+(defn append-slash [dir-name] (str dir-name "/"))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; I couldn't explain again how these work, but they do. You give tree-map a
+; function and a tree. The function should take three args, the first is a
+; tree, the second the absolute prefix for this tree, and three the local
+; duffel project prefix for this tree. The function should return the tree
+; modified to your liking. When returned tree map will find all sub-trees
+; (directories) in the tree you returned and run tree-map on them again, with
+; aboslute and local prefixes updated accordingly. I'm leaving test-map around
+; so you can see an example. It'll give each directory struct an :abs and a
+; :local key so you can see what the list was being run with.
+;
+(declare _tree-map)
+(defn tree-map
+    [user-fn dir-tree]
+    (let [ root-node  (first dir-tree)
+           root-abs   (root-node :base-name)
+           root-local "" ]
+        (_tree-map user-fn (chroot-tree "" dir-tree) root-abs root-local)))
+
+(defn _tree-map
+    [user-fn dir-tree abs local]
+    (let [ abs-a             (if (= abs "/") abs (append-slash abs))
+           new-dir-tree      (user-fn dir-tree abs-a local)
+           new-dir-tree-node (first new-dir-tree)
+           new-abs           (str abs-a (new-dir-tree-node :base-name))
+           new-local         (append-slash (str local (new-dir-tree-node :full-name))) ]
+        (map #(if (seq? %)
+                  (_tree-map user-fn % new-abs new-local)
+                  %)
+             new-dir-tree)))
+
+(defn test-map [dir-tree abs-prefix local-prefix]
+    (cons
+        (assoc (first dir-tree) :abs   abs-prefix
+                                :local local-prefix )
+        (rest dir-tree)))
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
