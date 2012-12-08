@@ -185,6 +185,11 @@
     [file-struct filename]
     (and (not (seq? file-struct)) (= (file-struct :base-name) filename)))
 
+(defn dump-file
+    [filename]
+    (try (slurp filename)
+    (catch java.lang.Exception e nil)))
+
 (defn merge-meta
     "Given a file-struct and some metadata merges the file-struct's meta field
     with the given metadata"
@@ -211,5 +216,5 @@
     [dir-tree local-prefix]
     (if-let [meta-file (some #(when (basename-is? % "_meta.json") %) dir-tree)]
         [ (filter #(not (basename-is? % "_meta.json")) dir-tree)
-          (slurp (str local-prefix (meta-file :full-name))) ]
+          (dump-file (str local-prefix (meta-file :full-name))) ]
         [ dir-tree "" ]))
