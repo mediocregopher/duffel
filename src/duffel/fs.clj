@@ -181,6 +181,10 @@
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn basename-is?
+    [file-struct filename]
+    (and (not (seq? file-struct)) (= (file-struct :base-name) filename)))
+
 (defn merge-meta
     "Given a file-struct and some metadata merges the file-struct's meta field
     with the given metadata"
@@ -195,6 +199,17 @@
     [dir-tree filename meta-struct]
     (if (= "." filename)
         (cons (merge-meta (first dir-tree) meta-struct) (rest dir-tree))
-        (cons (first dir-tree) (map #(if (and (not (seq? %)) (= (% :base-name) filename))
+        (cons (first dir-tree) (map #(if (basename-is? % filename)
                                      (merge-meta % meta-struct)
                                      %) (rest dir-tree)))))
+
+(defn pull-meta-file
+    "Given a dir-tree and the local prefix for the dir-tree, tries to find a _meta.json in the tree.
+    If found we remove the meta file-struct from the dir-tree and try to read the file from the disk,
+    returning the filtered dir-tree and the contents of the _meta.json file, or the original dir-tree
+    and a blank string if no _meta.json file was found"
+    [dir-tree local-prefix]
+    (if-let [meta-file (some #(when (basename-is? % "_meta.json") %) dir-tree)]
+        [ (filter #(not (basename-is? % "_meta.json")) dir-tree)
+          (slurp (str local-prefix (meta-file :full-name))) ]
+        [ dir-tree "" ]))
