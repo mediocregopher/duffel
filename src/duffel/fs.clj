@@ -79,17 +79,6 @@
       :dir-ls    dir-ls 
       :is-dir?   true    }))
 
-(defn explode-files-in-list 
-    "Take a list of filenames and turn them into file structs containing info
-    about their real name, extension, and host specifier"
-    [file-list]
-    (map explode-file file-list))
-
-(defn remove-empty-file-structs
-    "Looks through list of file structs and removes any with empty names"
-    [file-structs]
-    (remove #(empty? (% :base-name)) file-structs))
-
 (defn add-to-basename-group 
     "Given a map and a file struct, creates a list with the file-struct
     as the only item for the index of the map corresponding to the file-
@@ -101,12 +90,6 @@
           new-seq (cons file-struct base-name-seq)]
         (assoc file-map base-name new-seq)))
 
-(defn group-by-basename
-    "Goes through file structs and groups them into a map by basename
-    { <base-name> <list of structs> }"
-    [file-structs]
-    (reduce add-to-basename-group {} file-structs))
-
 (defn narrow-group
     "Given a list of file-structs, returns the struct with the most specific
     specifier"
@@ -114,12 +97,6 @@
     (let [specifiers (map #(% :specifier) group-seq)]
         (when-let [i (index-of-specified-entry specifiers)]
             (nth group-seq i))))
-
-(defn narrow-groups
-    "Given a map of basename groups, returns a list of all the most specific
-    structs from each basename group"
-    [file-map]
-    (map #(narrow-group (val %)) file-map))
 
 (declare specify-files)
 (defn directory-consolidate
@@ -131,10 +108,6 @@
         (cons (dissoc file-struct :dir-ls) (specify-files (file-struct :dir-ls)))
         file-struct))
 
-(defn directory-recursion
-    [file-structs]
-    (map directory-consolidate file-structs))
-
 (defn specify-files 
     "Given a list of file names (presumably all in the same folder) goes and performs
     all the steps needed to narrow down which files we want to actually use for this
@@ -142,11 +115,11 @@
     Returns a list of file-structs"
     [file-list]
     (->> file-list
-         (explode-files-in-list)
-         (remove-empty-file-structs)
-         (group-by-basename)
-         (narrow-groups)
-         (directory-recursion)))
+         (map explode-file)                 ; - Explode the files into their file-struct's
+         (remove #(empty? (% :base-name)))  ; - Remove ones with empty base-names (shouldn't really happen)
+         (reduce add-to-basename-group {})  ; - Reduce the structs by basename into a grouplist map
+         (map #(narrow-group (val %)))      ; - Take all the vals in the grouplist map and narrow them down to a single file-struct
+         (map directory-consolidate)))      ; - Call specify files on the file list of all directory structs
 
 (defn specify-tree
     "Since specify-files expects simply a list of files, not a '(dir & files)
