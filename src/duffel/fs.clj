@@ -215,6 +215,6 @@
     and a blank string if no _meta.json file was found"
     [dir-tree local-prefix]
     (if-let [meta-file (some #(when (basename-is? % "_meta.json") %) dir-tree)]
-        [ (filter #(not (basename-is? % "_meta.json")) dir-tree)
+        [ (remove #(basename-is? % "_meta.json") dir-tree)
           (dump-file (str local-prefix (meta-file :full-name))) ]
         [ dir-tree "" ]))
