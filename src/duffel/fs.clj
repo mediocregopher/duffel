@@ -180,3 +180,21 @@
         (rest dir-tree)))
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn merge-meta
+    "Given a file-struct and some metadata merges the file-struct's meta field
+    with the given metadata"
+    [file-struct meta-struct]
+    (assoc file-struct :meta (merge (file-struct :meta {}) meta-struct)))
+
+(defn assoc-meta
+    "Given a dir-tree looks through the dir-tree for a file with :base-name == filename
+    and merges the given meta-struct with that file's :meta field. If the filename is .
+    then apply the merge on the top level item (the directory struct). Does not go recursively
+    down the tree."
+    [dir-tree filename meta-struct]
+    (if (= "." filename)
+        (cons (merge-meta (first dir-tree) meta-struct) (rest dir-tree))
+        (cons (first dir-tree) (map #(if (and (not (seq? %)) (= (% :base-name) filename))
+                                     (merge-meta % meta-struct)
+                                     %) (rest dir-tree)))))
