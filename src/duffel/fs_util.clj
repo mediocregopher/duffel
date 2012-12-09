@@ -28,7 +28,8 @@
     (let [ root-node  (first dir-tree)
            root-abs   (root-node :base-name)
            root-local "" ]
-        (_tree-map user-fn (chroot-tree "" dir-tree) root-abs root-local)))
+        (chroot-tree root-abs
+            (_tree-map user-fn (chroot-tree "" dir-tree) root-abs root-local))))
 
 (defn _tree-map
     [user-fn dir-tree abs local]

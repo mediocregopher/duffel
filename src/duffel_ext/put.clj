@@ -51,4 +51,14 @@
             (fn [d _ _] (meta->dir-tree d meta-struct)) 
             (rest dir-tree)))))
 
-(defn preprocess-file [file-struct] file-struct)
+(defn preprocess-file  [file-struct] file-struct)
+(defn postprocess-dir  [dir-struct]  dir-struct)
+(defn postprocess-file [file-struct] file-struct)
+
+(defn process-file [meta-struct abs local]
+    (println local "->" abs "::" meta-struct))
+
+(defn process-dir [meta-struct abs local]
+    (println local "->" abs "::" meta-struct))
+
+

@@ -15,9 +15,12 @@
 ; Template-processing - Used to apply the file and dir templates where necessary. Not implemented
 ;                       by extension itself, only used tpl structs given by extension
 ;
+; Postprocessessing - Same thing as preprocessing. I'm not actually using it, but someone else
+;                     might
+;
 ; Actual processessing - Where the magic happens
 
-(defn preprocess
+(defn pre-process
     "Goes through the dir-tree and, using tree-map, calls preprocess-dir on all directories
     and preprocess-file on all files"
     [dir-tree]
@@ -27,6 +30,35 @@
             (cons processed-root
                 (map #(if (seq? %) % (dput/preprocess-file %)) (rest processed-d))))
     ) dir-tree))
+
+;I'll consolidate all these process functions once I figure out how I wanna do the detecting extension
+;and deciding on the function call based on that
+(defn post-template-process
+    "Goes through the dir-tree and, using tree-map, calls postprocess-dir on all directories
+    and preprocess-file on all files"
+    [dir-tree]
+    (dfs-util/tree-map (fn [d _ _] 
+        (let [processed-d (dput/postprocess-dir d)
+              processed-root (first processed-d)]
+            (cons processed-root
+                (map #(if (seq? %) % (dput/postprocess-file %)) (rest processed-d))))
+    ) dir-tree))
+
+(defn process
+    [dir-tree]
+    (dfs-util/tree-map 
+        (fn [d abs-prefix local-prefix] 
+            (let [ d-root         (first d)
+                   d-abs          (str abs-prefix   (d-root :base-name))
+                   d-local        (str local-prefix (d-root :full-name))
+                   d-abs-prefix   (dfs-util/append-slash d-abs)
+                   d-local-prefix (dfs-util/append-slash d-local) ]
+                (dput/process-dir (d-root :meta) d-abs d-local)
+                (doseq [f (rest d)] (when-not (seq? f) 
+                    (dput/process-file (f :meta) (str d-abs-prefix   (f :base-name)) 
+                                                 (str d-local-prefix (f :full-name))))))
+        d) 
+        dir-tree))
 
 (defn _try-apply-template 
     "Given a file-struct and a template, tries to run the metadata of the file-struct
