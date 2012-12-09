@@ -1,6 +1,7 @@
 (ns duffel.fs
-    (:require [duffel.ext  :as ext]
-              [duffel.util :as util])
+    (:require [duffel.ext  :as dext]
+              [duffel.meta :as dmeta]
+              [duffel.util :as dutil])
     (:import java.io.File))
 
 
@@ -20,7 +21,7 @@
     the base filename (possibly with duffel extension), and the
     second is the host specifier (or '_default')"
     (if-let [re-res (re-find dot-underscore-split file-name)]
-        (if (ext/is-extension (last re-res))
+        (if (dext/is-extension (last re-res))
             (list file-name "_default")
             (rest re-res))
         (list file-name "_default")))
@@ -30,7 +31,7 @@
     returns a list where first item is the base filename and the
     second is the extension to apply"
     (if-let [re-res (re-find dot-underscore-split file-name)]
-        (if (ext/is-extension (last re-res))
+        (if (dext/is-extension (last re-res))
             (rest re-res)
             (list file-name "put"))
         (list file-name "put")))
@@ -46,10 +47,10 @@
 (defn index-of-specified-entry [host-seq]
     "Given a list of host specifiers, returns index of most specific one, or nil
     if none match"
-    (util/thread-until host-seq
-        (partial util/index-when fdqn-matches)
-        (partial util/index-when hostname-matches)
-        (partial util/index-when #(= "_default" %))))
+    (dutil/thread-until host-seq
+        (partial dutil/index-when fdqn-matches)
+        (partial dutil/index-when hostname-matches)
+        (partial dutil/index-when #(= "_default" %))))
 
 (defmulti explode-file seq?)
 (defmethod explode-file false [file-name]
@@ -188,20 +189,28 @@
 (defn merge-meta
     "Given a file-struct and some metadata merges the file-struct's meta field
     with the given metadata"
-    [file-struct meta-struct]
-    (assoc file-struct :meta (merge (file-struct :meta {}) meta-struct)))
+    [file-struct meta-file-struct]
+    (assoc file-struct :meta (merge (file-struct :meta {}) meta-file-struct)))
+
+(defn merge-meta-dir
+    "Given a dir-tree and metadata, merges the dir-tree's root element's metadata
+    with the given metadata"
+    [dir-tree meta-file-struct]
+    (cons (merge-meta (first dir-tree) meta-file-struct) (rest dir-tree)))
 
 (defn assoc-meta
     "Given a dir-tree looks through the dir-tree for a file with :base-name == filename
     and merges the given meta-struct with that file's :meta field. If the filename is .
     then apply the merge on the top level item (the directory struct). Does not go recursively
     down the tree."
-    [dir-tree filename meta-struct]
+    [dir-tree filename meta-file-struct]
     (if (= "." filename)
-        (cons (merge-meta (first dir-tree) meta-struct) (rest dir-tree))
-        (cons (first dir-tree) (map #(if (basename-is? % filename)
-                                     (merge-meta % meta-struct)
-                                     %) (rest dir-tree)))))
+        (merge-meta-dir dir-tree meta-file-struct)
+        (cons (first dir-tree)
+            (map #(if (basename-is? % filename) (merge-meta % meta-file-struct)
+                  (if (and (seq? %) 
+                           (basename-is? (first %) filename)) (merge-meta-dir % meta-file-struct)
+                   %))(rest dir-tree)))))
 
 (defn pull-meta-file
     "Given a dir-tree and the local prefix for the dir-tree, tries to find a _meta.json in the tree.
@@ -211,9 +220,24 @@
     [dir-tree local-prefix]
     (if-let [meta-file (some #(when (basename-is? % "_meta.json") %) dir-tree)]
         [ (remove #(basename-is? % "_meta.json") dir-tree)
-          (slurp (str local-prefix (meta-file :full-name))) ]
+          (slurp (str local-prefix (append-slash ((first dir-tree) :full-name)) (meta-file :full-name))) ]
         [ dir-tree "{}" ]))
 
-(def test-tree
+(defn distribute-meta
+    "A function to be passed into tree map which will find (and remove) all _meta.json files from the
+    map, read them in, and apply the meta object inside of them to the appropriate file-structs"
+    [dir-tree _ local-prefix]
+    (let [ pull-meta-ret (pull-meta-file dir-tree local-prefix)
+           new-dir-tree  (first  pull-meta-ret)
+           meta-string   (second pull-meta-ret) ]
+        (if-let [ meta-struct (dmeta/parse-meta-string meta-string) ]
+            (reduce #(assoc-meta %1 (key %2) (val %2)) new-dir-tree meta-struct)
+            (throw (Exception. (str "Could not parse _meta.json file in " 
+                                    local-prefix ((first dir-tree) :full-name)
+                                    ", it might not be valid json"))))))
+
+(defn test-tree []
     (->> (specify-tree "my-duffel")
-         (chroot-tree "/tmp")))
+         (chroot-tree "/tmp")
+         (tree-map distribute-meta)
+         ))
