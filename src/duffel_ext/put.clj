@@ -6,13 +6,13 @@
 (def default-group default-username)    ;Assume primary group = username, cause fuck it
 
 (defn file-meta-tpl []
-    { :chmod (list :string (list :optional "0644") '(:regex #"[0-7]{3,4}"))
+    { :chmod (list :string (list :optional "0644") '(:regex #"^[0-7]{3,4}$"))
       :owner (list :string (list :optional default-username)             )
       :group (list :string (list :optional default-group)                ) })
 
 (defn dir-meta-tpl []
     (merge (file-meta-tpl)
-       { :chmod (list :string (list :optional "0755") '(:regex #"[0-7]{3,4}")) 
+       { :chmod (list :string (list :optional "0755") '(:regex #"^[0-7]{3,4}$")) 
          :delete_untracked  '(:bool (:optional false)) }))
 
 (defn clean-meta-struct

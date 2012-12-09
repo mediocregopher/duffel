@@ -185,4 +185,5 @@
          (dfs-util/chroot-tree "/tmp")
          (dfs-util/tree-map distribute-meta)
          (dext/preprocess)
+         (dext/process-templates)
          ))
