@@ -18,4 +18,9 @@
 
 (defn preprocess
     [dir-tree]
-    (dfs-util/tree-map (fn [d _ _] (dput/preprocess-dir d)) dir-tree))
+    (dfs-util/tree-map (fn [d _ _] 
+        (let [processed-d (dput/preprocess-dir d)
+              processed-root (first processed-d)]
+            (cons processed-root
+                (map #(if (seq? %) % (dput/preprocess-file %)) (rest processed-d))))
+    ) dir-tree))

@@ -51,3 +51,4 @@
             (fn [d _ _] (meta->dir-tree d meta-struct)) 
             (rest dir-tree)))))
 
+(defn preprocess-file [file-struct] file-struct)
