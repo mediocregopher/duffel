@@ -53,7 +53,7 @@
                    d-local        (str local-prefix (d-root :full-name))
                    d-abs-prefix   (dfs-util/append-slash d-abs)
                    d-local-prefix (dfs-util/append-slash d-local) ]
-                (dput/process-dir (d-root :meta) d-abs d-local)
+                (when-not (d-root :is-root?) (dput/process-dir (d-root :meta) d-abs d-local))
                 (doseq [f (rest d)] (when-not (seq? f) 
                     (dput/process-file (f :meta) (str d-abs-prefix   (f :base-name)) 
                                                  (str d-local-prefix (f :full-name))))))

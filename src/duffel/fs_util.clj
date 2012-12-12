@@ -1,4 +1,5 @@
-(ns duffel.fs-util)
+(ns duffel.fs-util
+    (:import java.io.File))
 
 (defn chroot-tree
     [root dir-tree]
@@ -6,7 +7,7 @@
     should not end in a /. If you want to chroot to root itself (/) pass in a blank
     string"
     (let [root-node  (first dir-tree)]
-        (cons (assoc root-node :base-name root) (rest dir-tree))))
+        (cons (assoc root-node :base-name root :is-root? true) (rest dir-tree))))
 
 (defn append-slash [dir-name] (str dir-name "/"))
 
@@ -70,3 +71,38 @@
 
 (defn merge-meta-dir         [d m] (_merge-meta-dir d m merge-meta))
 (defn merge-meta-dir-reverse [d m] (_merge-meta-dir d m merge-meta-reverse))
+
+(defn mkdir-p 
+    "Calls mkdir -p on the given directory"
+    [dir]
+    (.mkdirs (java.io.File. dir)))
+
+(defn exec
+    "Executes a command, throws an exception if the command doesn't return
+    an exit code of 0"
+    [command]
+    (let [runtime  (Runtime/getRuntime)
+          proc     (.exec runtime command)
+          proc-ret (.waitFor proc)]
+        (when-not (= 0 proc-ret)
+            (throw (Exception. (slurp (.getErrorStream proc)))))))
+
+(defn chmod 
+    "Calls chmod on a file/directory"
+    [perms fsitem]
+    (exec (str "chmod " perms " " fsitem)))
+
+(defn chown
+    "Calls chown on a file/directory"
+    [user group fsitem]
+    (exec (str "chown " user ":" group " " fsitem)))
+
+(defn chown-R
+    "Calls chown -R on a file/directory"
+    [user group fsitem]
+    (exec (str "chown -R " user ":" group " " fsitem)))
+
+(defn cp
+    "Calls cp <src> <dst>"
+    [src dst]
+    (exec (str "cp " src " " dst)))

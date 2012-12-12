@@ -56,9 +56,15 @@
 (defn postprocess-file [file-struct] file-struct)
 
 (defn process-file [meta-struct abs local]
-    (println local "->" abs "::" meta-struct))
+    (println "cp" local "->" abs "::" 
+        (meta-struct :chmod) (str (meta-struct :owner) ":" (meta-struct :group)))
+    (dfs-util/cp local abs)
+    (dfs-util/chown (meta-struct :owner) (meta-struct :group) abs)
+    (dfs-util/chmod (meta-struct :chmod) abs))
 
 (defn process-dir [meta-struct abs local]
-    (println local "->" abs "::" meta-struct))
-
-
+    (println "mkdir" local "->" abs "::" 
+        (meta-struct :chmod) (str (meta-struct :owner) ":" (meta-struct :group)))
+    (dfs-util/mkdir-p abs)
+    (dfs-util/chown (meta-struct :owner) (meta-struct :group) abs)
+    (dfs-util/chmod (meta-struct :chmod) abs))
