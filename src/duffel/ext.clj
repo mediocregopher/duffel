@@ -4,13 +4,16 @@
     (:require [duffel.fs-util :as dfs-util]
               [duffel-ext.put :as dput]))
 
-(def extensions { "put" (dput/->put-ext) })
+(def extensions (atom {}))
 
 (defn is-extension [suffix]
-    (contains? extensions suffix))
+    (contains? @extensions suffix))
 
 (defn ext-instance [file-struct]
-    (extensions (file-struct :extension)))
+    (@extensions (file-struct :extension)))
+
+(defn register-ext [ext ext-inst]
+    (swap! extensions assoc ext ext-inst))
 
 ; Preprocessing - used basically just for apply recursively and stuff, before the templates
 ;                 are applied. Can also be used to forcefully exclude files/dirs from having

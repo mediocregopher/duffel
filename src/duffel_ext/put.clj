@@ -1,6 +1,7 @@
 (ns duffel-ext.put
     (:use duffel.ext-protocol)
-    (:require [duffel.fs-util :as dfs-util])
+    (:require [duffel.fs-util :as dfs-util]
+              [duffel.ext     :as dext])
     (:import java.lang.System))
 
 (def default-username (java.lang.System/getProperty "user.name"))
@@ -79,3 +80,5 @@
     (postprocess-file [x file-struct] (_postprocess-file file-struct))
     (process-dir [x meta-struct abs local] (_process-dir meta-struct abs local))
     (process-file [x meta-struct abs local] (_process-file meta-struct abs local)))
+
+(dext/register-ext "put" (->put-ext))
