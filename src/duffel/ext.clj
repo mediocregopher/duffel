@@ -1,12 +1,16 @@
 (ns duffel.ext
     (:use massage.json)
+    (:use duffel.ext-protocol)
     (:require [duffel.fs-util :as dfs-util]
               [duffel-ext.put :as dput]))
 
-(def extensions [ "put" "tpl" ])
+(def extensions { "put" (dput/->put-ext) })
 
 (defn is-extension [suffix]
-    (not (nil? (some #{suffix} extensions))))
+    (contains? extensions suffix))
+
+(defn ext-instance [file-struct]
+    (extensions (file-struct :extension)))
 
 ; Preprocessing - used basically just for apply recursively and stuff, before the templates
 ;                 are applied. Can also be used to forcefully exclude files/dirs from having
@@ -25,10 +29,11 @@
     and preprocess-file on all files"
     [dir-tree]
     (dfs-util/tree-map (fn [d _ _] 
-        (let [processed-d (dput/preprocess-dir d)
+        (let [ext (ext-instance (first d))
+              processed-d (preprocess-dir ext d)
               processed-root (first processed-d)]
             (cons processed-root
-                (map #(if (seq? %) % (dput/preprocess-file %)) (rest processed-d))))
+                (map #(if (seq? %) % (preprocess-file (ext-instance %) %)) (rest processed-d))))
     ) dir-tree))
 
 ;I'll consolidate all these process functions once I figure out how I wanna do the detecting extension
@@ -38,10 +43,11 @@
     and preprocess-file on all files"
     [dir-tree]
     (dfs-util/tree-map (fn [d _ _] 
-        (let [processed-d (dput/postprocess-dir d)
+        (let [ext (ext-instance (first d))
+              processed-d (postprocess-dir ext d)
               processed-root (first processed-d)]
             (cons processed-root
-                (map #(if (seq? %) % (dput/postprocess-file %)) (rest processed-d))))
+                (map #(if (seq? %) % (postprocess-file (ext-instance %) %)) (rest processed-d))))
     ) dir-tree))
 
 (defn process
@@ -49,14 +55,16 @@
     (dfs-util/tree-map 
         (fn [d abs-prefix local-prefix] 
             (let [ d-root         (first d)
+                   d-root-ext     (ext-instance d-root)
                    d-abs          (str abs-prefix   (d-root :base-name))
                    d-local        (str local-prefix (d-root :full-name))
                    d-abs-prefix   (dfs-util/append-slash d-abs)
                    d-local-prefix (dfs-util/append-slash d-local) ]
-                (when-not (d-root :is-root?) (dput/process-dir (d-root :meta) d-abs d-local))
+                (when-not (d-root :is-root?) (process-dir d-root-ext (d-root :meta) d-abs d-local))
                 (doseq [f (rest d)] (when-not (seq? f) 
-                    (dput/process-file (f :meta) (str d-abs-prefix   (f :base-name)) 
-                                                 (str d-local-prefix (f :full-name))))))
+                    (process-file (ext-instance f) (f :meta) 
+                                                   (str d-abs-prefix   (f :base-name)) 
+                                                   (str d-local-prefix (f :full-name))))))
         d) 
         dir-tree))
 
@@ -78,9 +86,9 @@
 
 (defmulti try-apply-template (fn [file-struct _] (file-struct :is-dir?)))
 (defmethod try-apply-template false [file-struct local-prefix]
-    (_try-apply-template file-struct local-prefix (dput/file-meta-tpl)))
+    (_try-apply-template file-struct local-prefix (file-meta-tpl (ext-instance file-struct))))
 (defmethod try-apply-template true [file-struct local-prefix]
-    (_try-apply-template file-struct local-prefix (dput/dir-meta-tpl)))
+    (_try-apply-template file-struct local-prefix (dir-meta-tpl (ext-instance file-struct))))
     
 
 (defn process-templates
