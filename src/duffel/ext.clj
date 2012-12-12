@@ -1,8 +1,7 @@
 (ns duffel.ext
     (:use massage.json)
     (:use duffel.ext-protocol)
-    (:require [duffel.fs-util :as dfs-util]
-              [duffel-ext.put :as dput]))
+    (:require [duffel.fs-util :as dfs-util]))
 
 (def extensions (atom {}))
 

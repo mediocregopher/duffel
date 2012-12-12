@@ -7,16 +7,6 @@
 (def default-username (java.lang.System/getProperty "user.name"))
 (def default-group default-username)    ;Assume primary group = username, cause fuck it
 
-(defn _file-meta-tpl []
-    { :chmod (list :string (list :optional "0644") '(:regex #"^[0-7]{3,4}$"))
-      :owner (list :string (list :optional default-username)             )
-      :group (list :string (list :optional default-group)                ) })
-
-(defn _dir-meta-tpl []
-    (merge (_file-meta-tpl)
-       { :chmod (list :string (list :optional "0755") '(:regex #"^[0-7]{3,4}$")) 
-         :delete_untracked  '(:bool (:optional false)) }))
-
 (defn clean-meta-struct
     "We don't want these to ever propogate, so we can use this function to clean
     them out"
@@ -53,32 +43,42 @@
             (fn [d _ _] (meta->dir-tree d meta-struct)) 
             (rest dir-tree)))))
 
-(defn _preprocess-file  [file-struct] file-struct)
-(defn _postprocess-dir  [dir-struct]  dir-struct)
-(defn _postprocess-file [file-struct] file-struct)
-
-(defn _process-file [meta-struct abs local]
-    (println "cp" local "->" abs "::" 
-        (meta-struct :chmod) (str (meta-struct :owner) ":" (meta-struct :group)))
-    (dfs-util/cp local abs)
-    (dfs-util/chown (meta-struct :owner) (meta-struct :group) abs)
-    (dfs-util/chmod (meta-struct :chmod) abs))
-
-(defn _process-dir [meta-struct abs local]
-    (println "mkdir" local "->" abs "::" 
-        (meta-struct :chmod) (str (meta-struct :owner) ":" (meta-struct :group)))
-    (dfs-util/mkdir-p abs)
-    (dfs-util/chown (meta-struct :owner) (meta-struct :group) abs)
-    (dfs-util/chmod (meta-struct :chmod) abs))
-
 (deftype put-ext [] duffel-extension
+
+    ;This one needed special attention, since a defmulti was the most efficient way to
+    ;implement it
     (preprocess-dir [x dir-tree] (_preprocess-dir dir-tree))
-    (preprocess-file [x file-struct] (_preprocess-file file-struct))
-    (dir-meta-tpl [x] (_dir-meta-tpl))
-    (file-meta-tpl [x] (_file-meta-tpl))
-    (postprocess-dir [x dir-struct] (_postprocess-dir dir-struct))
-    (postprocess-file [x file-struct] (_postprocess-file file-struct))
-    (process-dir [x meta-struct abs local] (_process-dir meta-struct abs local))
-    (process-file [x meta-struct abs local] (_process-file meta-struct abs local)))
+
+    (file-meta-tpl [x]
+        { :chmod (list :string (list :optional "0644") '(:regex #"^[0-7]{3,4}$"))
+          :owner (list :string (list :optional default-username)             )
+          :group (list :string (list :optional default-group)                ) })
+
+    (dir-meta-tpl [x]
+        (merge (file-meta-tpl x)
+           { :chmod (list :string (list :optional "0755") '(:regex #"^[0-7]{3,4}$")) 
+             :delete_untracked  '(:bool (:optional false)) }))
+
+    ;These just return what they're given, no changed to the structs in these stages
+    (preprocess-file [x file-struct] file-struct)
+    (postprocess-dir [x dir-struct] dir-struct)
+    (postprocess-file [x file-struct] file-struct)
+
+    (process-dir [x meta-struct abs local]
+        (println "mkdir" local "->" abs "::" 
+            (meta-struct :chmod) (str (meta-struct :owner) ":" (meta-struct :group)))
+        (dfs-util/mkdir-p abs)
+        (dfs-util/chown (meta-struct :owner) (meta-struct :group) abs)
+        (dfs-util/chmod (meta-struct :chmod) abs))
+
+
+    (process-file [x meta-struct abs local]
+        (println "cp" local "->" abs "::" 
+            (meta-struct :chmod) (str (meta-struct :owner) ":" (meta-struct :group)))
+        (dfs-util/cp local abs)
+        (dfs-util/chown (meta-struct :owner) (meta-struct :group) abs)
+        (dfs-util/chmod (meta-struct :chmod) abs))
+
+)
 
 (dext/register-ext "put" (->put-ext))
