@@ -24,31 +24,30 @@
 ;
 ; Actual processessing - Where the magic happens
 
+(defn gen-process-structs
+    "Goes through the dir-tree and, using tree-map, calls dir-fn on all directories
+    and file-fn on all files"
+    [dir-tree dir-fn file-fn]
+    [dir-tree]
+    (dfs-util/tree-map (fn [d _ _] 
+        (let [ext (ext-instance (first d))
+              processed-d (dir-fn ext d)
+              processed-root (first processed-d)]
+            (cons processed-root
+                (map #(if (seq? %) % (file-fn (ext-instance %) %)) (rest processed-d))))
+    ) dir-tree))
+
 (defn pre-process
     "Goes through the dir-tree and, using tree-map, calls preprocess-dir on all directories
     and preprocess-file on all files"
     [dir-tree]
-    (dfs-util/tree-map (fn [d _ _] 
-        (let [ext (ext-instance (first d))
-              processed-d (preprocess-dir ext d)
-              processed-root (first processed-d)]
-            (cons processed-root
-                (map #(if (seq? %) % (preprocess-file (ext-instance %) %)) (rest processed-d))))
-    ) dir-tree))
+    (gen-process-structs dir-tree preprocess-dir preprocess-file))
 
-;I'll consolidate all these process functions once I figure out how I wanna do the detecting extension
-;and deciding on the function call based on that
 (defn post-template-process
     "Goes through the dir-tree and, using tree-map, calls postprocess-dir on all directories
     and preprocess-file on all files"
     [dir-tree]
-    (dfs-util/tree-map (fn [d _ _] 
-        (let [ext (ext-instance (first d))
-              processed-d (postprocess-dir ext d)
-              processed-root (first processed-d)]
-            (cons processed-root
-                (map #(if (seq? %) % (postprocess-file (ext-instance %) %)) (rest processed-d))))
-    ) dir-tree))
+    (gen-process-structs dir-tree postprocess-dir postprocess-file))
 
 (defn process
     [dir-tree]
