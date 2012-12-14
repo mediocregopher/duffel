@@ -179,16 +179,3 @@
             (throw (Exception. (str "Could not parse _meta.json file in " 
                                     local-prefix ((first dir-tree) :full-name)
                                     ", it might not be valid json"))))))
-
-(defn doall* [s] (dorun (tree-seq seq? seq s)) s)
-(defn test-tree []
-    (doall*
-        (->> (specify-tree "my-duffel")
-             (dfs-util/chroot-tree "/tmp")
-             (dfs-util/tree-map distribute-meta)
-             (dext/pre-process)
-             (dext/process-templates)
-             (dext/post-template-process)
-             (dext/process)
-             ))
-    nil)

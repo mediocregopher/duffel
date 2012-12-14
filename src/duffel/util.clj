@@ -1,5 +1,9 @@
 (ns duffel.util)
 
+(defn doall* 
+    "Same as doall, but recursive"
+    [s] (dorun (tree-seq seq? seq s)) s)
+
 (defn index-when
     "Returns index of first item in seq for which (pred item) returns true"
     [pred seq]
