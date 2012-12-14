@@ -2,7 +2,11 @@
 
 ## Basic Usage
 
-Duffel is a standalone executable which will automatically deploy a directory structure to your machine.
+Duffel is a standalone executable which will automatically deploy a directory structure to your machine. You can
+download the exectuable [here](https://raw.github.com/mediocregopher/duffel/master/duffel). Put it so that it's in
+your path and is executable. When you run it the first time it will download the duffel jar for you, and from then
+on you can call ```duffel``` and it will automatically load up the duffel jar and pass all cli arguments through to
+it.
 
 Given the following directory structure:
 ```
@@ -72,7 +76,8 @@ You can apply the same to directories as well:
 Will put ```/tmp/one/``` with ```green.txt``` in it if the host's name is ```hostname1```, and ```blue.txt```
 otherwise.
 
-## Per-group files
+## Per-group files (not done yet)
+**Per-group files haven't been implemented yet**
 
 With the following directory structure:
 ```
@@ -92,7 +97,8 @@ The order of priority for matching is as follows:
 * group
 * default
 
-## Templates
+## Templates (not done yet)
+**Templates haven't been implemented yet. I haven't found a simple templating engine I like thus-far**
 
 With the following directory structure:
 ```
@@ -241,7 +247,8 @@ this is how the permissions for each item would end up:
 * /tmp/one/       -> owned by user2
 * /tmp/one/two.xt -> owned by user3
 
-## Special Folder Names
+## Special Folder Names (not done yet)
+**Special folder names haven't been implemented yet**
 
 There are special folder names you can use in the root of your duffel project which will map based on environment variables or even custom scripts.
 
