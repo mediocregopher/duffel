@@ -80,34 +80,37 @@
 (defn exec
     "Executes a command, throws an exception if the command doesn't return
     an exit code of 0"
-    [command]
+    [command & args]
     (let [runtime  (Runtime/getRuntime)
-          proc     (.exec runtime command)
+          proc     (.exec runtime (into-array (cons command args)))
           proc-ret (.waitFor proc)]
-        (when-not (= 0 proc-ret)
+        (if (= 0 proc-ret)
+            (slurp (.getInputStream proc))
             (throw (Exception. (slurp (.getErrorStream proc)))))))
+
+        
 
 (defn chmod 
     "Calls chmod on a file/directory"
     [perms fsitem]
-    (exec (str "chmod " perms " " fsitem)))
+    (exec "chmod" perms fsitem))
 
 (defn chown
     "Calls chown on a file/directory"
     [user group fsitem]
-    (exec (str "chown " user ":" group " " fsitem)))
-
-(defn chown-R
-    "Calls chown -R on a file/directory"
-    [user group fsitem]
-    (exec (str "chown -R " user ":" group " " fsitem)))
+    (exec "chown" (str user ":" group) fsitem))
 
 (defn cp
     "Calls cp <src> <dst>"
     [src dst]
-    (exec (str "cp " src " " dst)))
+    (exec "cp" src dst))
 
 (defn ls
     "Returns a list of filenames in given directory"
     [dir]
     (map #(.getName %) (.listFiles (File. dir))))
+
+(defn rm-rf
+    "Deletes the given file or directory"
+    [filedir]
+    (exec "rm" "-rf" filedir))

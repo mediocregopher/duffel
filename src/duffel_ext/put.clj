@@ -63,18 +63,27 @@
     (preprocess-file [x file-struct] file-struct)
     (postprocess-file [x file-struct] file-struct)
 
+    ;We go through after templating and attach a list of tracked items to each directory.
+    ;This is needed for :delete_untracked
     (postprocess-dir [x dir-struct]
-        (let [file-list (->> (rest dir-struct)
-                             (remove seq?)
-                             (map #(% :base-name)))]
-            (dfs-util/merge-meta-dir dir-struct {:file-list file-list})))
+        (let [tracked (->> (rest dir-struct)
+                           (map #(if (seq? %) ((first %) :base-name) (% :base-name))))]
+            (dfs-util/merge-meta-dir dir-struct {:tracked tracked})))
 
     (process-dir [x meta-struct abs local]
         (println "mkdir" local "->" abs "::" 
             (meta-struct :chmod) (str (meta-struct :owner) ":" (meta-struct :group)))
         (dfs-util/mkdir-p abs)
         (dfs-util/chown (meta-struct :owner) (meta-struct :group) abs)
-        (dfs-util/chmod (meta-struct :chmod) abs))
+        (dfs-util/chmod (meta-struct :chmod) abs)
+        (when (meta-struct :delete_untracked)
+            (let [ tracked-files   (meta-struct :tracked)
+                   present-files   (set (dfs-util/ls abs))
+                   untracked       (apply disj (cons present-files tracked-files)) ]
+                (doseq [filedir untracked]
+                    (let [full-path (str abs "/" filedir)]
+                        (println "Deleting" full-path)
+                        (dfs-util/rm-rf full-path))))))
 
 
     (process-file [x meta-struct abs local]
