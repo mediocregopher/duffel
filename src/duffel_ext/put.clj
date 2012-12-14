@@ -61,8 +61,13 @@
 
     ;These just return what they're given, no changed to the structs in these stages
     (preprocess-file [x file-struct] file-struct)
-    (postprocess-dir [x dir-struct] dir-struct)
     (postprocess-file [x file-struct] file-struct)
+
+    (postprocess-dir [x dir-struct]
+        (let [file-list (->> (rest dir-struct)
+                             (remove seq?)
+                             (map #(% :base-name)))]
+            (dfs-util/merge-meta-dir dir-struct {:file-list file-list})))
 
     (process-dir [x meta-struct abs local]
         (println "mkdir" local "->" abs "::" 

@@ -106,3 +106,8 @@
     "Calls cp <src> <dst>"
     [src dst]
     (exec (str "cp " src " " dst)))
+
+(defn ls
+    "Returns a list of filenames in given directory"
+    [dir]
+    (map #(.getName %) (.listFiles (File. dir))))
