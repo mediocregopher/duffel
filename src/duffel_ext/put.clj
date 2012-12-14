@@ -57,7 +57,8 @@
     (dir-meta-tpl [x]
         (merge (file-meta-tpl x)
            { :chmod (list :string (list :optional "0755") '(:regex #"^[0-7]{3,4}$")) 
-             :delete_untracked  '(:bool (:optional false)) }))
+             :delete_untracked  '(:bool (:optional false))
+             :force_ownership   '(:bool (:optional false)) }))
 
     ;These just return what they're given, no changed to the structs in these stages
     (preprocess-file [x file-struct] file-struct)
@@ -74,8 +75,15 @@
         (println "mkdir" local "->" abs "::" 
             (meta-struct :chmod) (str (meta-struct :owner) ":" (meta-struct :group)))
         (dfs-util/mkdir-p abs)
-        (dfs-util/chown (meta-struct :owner) (meta-struct :group) abs)
-        (dfs-util/chmod (meta-struct :chmod) abs)
+
+        ;We try to do the ownership stuff, but if we can't and force_ownership isn't on
+        ;we don't worry about it
+        (try
+            (dfs-util/chown (meta-struct :owner) (meta-struct :group) abs)
+            (dfs-util/chmod (meta-struct :chmod) abs)
+        (catch Exception e
+            (when (meta-struct :force_ownership) (throw e))))
+
         (when (meta-struct :delete_untracked)
             (let [ tracked-files   (meta-struct :tracked)
                    present-files   (set (dfs-util/ls abs))

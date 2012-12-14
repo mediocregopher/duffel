@@ -114,3 +114,8 @@
     "Deletes the given file or directory"
     [filedir]
     (exec "rm" "-rf" filedir))
+
+(defn exists
+    "Returns true or false for whether or not the given file exists"
+    [file]
+    (.exists (File. file)))
