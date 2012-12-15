@@ -37,7 +37,7 @@
         [[ chroot "Directory to chroot to" "/" ]
          remaining]
          (if-let [dir (first remaining)]
-            (run-on-dir (first remaining) (parse-chroot chroot))))
+            (run-on-dir (first remaining) (parse-chroot chroot))
             (binding [*out* *err*]
                 (println "A duffel directory must be specified")
-                (System/exit 1)))
+                (System/exit 1)))))

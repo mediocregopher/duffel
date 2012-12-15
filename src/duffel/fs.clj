@@ -121,6 +121,7 @@
          (remove #(empty? (% :base-name)))  ; - Remove ones with empty base-names (shouldn't really happen)
          (reduce add-to-basename-group {})  ; - Reduce the structs by basename into a grouplist map
          (map #(narrow-group (val %)))      ; - Take all the vals in the grouplist map and narrow them down to a single file-struct
+         (remove nil?)                      ; - narrow-group returns nil if group can't be narrowed, remove those nils
          (map directory-consolidate)))      ; - Call specify files on the file list of all directory structs
 
 (defn specify-tree
