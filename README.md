@@ -208,6 +208,13 @@ this is how the permissions for each item would end up:
 * /tmp/one/       -> owned by user2
 * /tmp/one/two.xt -> owned by user3
 
+## Extensions
+
+Everything documented thus-far is actually handled by the ```put``` extension (psych!). Other
+extensions have different behaviors and purposes. Check out the
+[Extensions](https://github.com/mediocregopher/duffel/blob/master/doc/extensions.md) page for more
+info on how to use them and what extensions are available.
+
 ## Special Folder Names
 
 There are special folder names you can use in the root of your duffel project which will map based on environment variables or even custom scripts.
