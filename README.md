@@ -97,53 +97,6 @@ The order of priority for matching is as follows:
 * group
 * default
 
-## Templates (not done yet)
-**Templates haven't been implemented yet. I haven't found a simple templating engine I like thus-far**
-
-With the following directory structure:
-```
-/opt/my-duffel/
-    tmp/
-        one.txt._tpl
-```
-
-```one.txt._tpl``` will be parsed through a template engine (tbd which one) and placed as ```/tmp/one.txt```.
-
-If you have:
-```
-/opt/my-duffel/
-    tmp/
-        one.txt._tpl._hostname1
-        one.txt._tpl.__default
-```
-
-The first file will be parsed and placed if the machine's name is ```hostname1```, otherwise the second one will
-be.
-
-You can also mix and match template files with non-template files:
-```
-/opt/my-duffel/
-    tmp/
-        one.txt._hostname1
-        one.txt._tpl.__default
-```
-
-The above will place the first file un-parsed if the machine's name is ```hostname1```, otherwise it will parse the
-second file and place it.
-
-Another example:
-```
-/opt/my-duffel/
-    tmp/
-        one.txt._tpl._g_groupname1
-        one.txt._tpl._hostname1
-        one.txt._hostname2
-        one.txt.__default
-```
-
-If hostname == ```hostname1```, parse and place the second file. Else if hostname == ```hostname2```, place the third file. Else if
-the machine is in ```groupname1``` parse and place the first file. Else, place the fourth file.
-
 ## Metadata
 
 Every folder (including the top level one, if you're feeling dangerous) can have a ```_meta.json``` file. This file contains information
@@ -195,9 +148,17 @@ running the duffel process if it's not set. Chmod defaults to 0644 for files and
 
 All directory objects (including the one for ".") can additionally have the following parameters:
 
-* "apply_to_contents" (bool): Whether or not to apply the metadata parameters to the contents of the directory
-* "apply_recursively" (bool): Whether or not to apply the metadata parameters recursively (implies "apply_to_contents")
-* "delete_untracked"  (bool): Delete any files/folders in the directory which aren't explicitely put by duffel
+* "apply_to_contents" (bool): Whether or not to apply the metadata parameters to the contents of the 
+                              directory
+* "apply_recursively" (bool): Whether or not to apply the metadata parameters recursively (implies 
+                              "apply_to_contents")
+* "delete_untracked"  (bool): Delete any files/folders in the directory which aren't explicitely put 
+                              by duffel
+* "force_ownership"   (bool): By default if a directory already exists duffel won't try to change its 
+                              ownership or chmod permissions. This option makes it force (attempt) to
+                              change the directory's permissions, in contrast with the behavior for
+                              files which always attempt to change permissions. I'm still going back
+                              and forth on this behavior, I'm not married to it.
 
 All of these parameters default to false if not specified.
 
