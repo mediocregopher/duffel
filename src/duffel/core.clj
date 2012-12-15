@@ -13,14 +13,13 @@
     (case chroot
         ""  ""
         "/" ""
-        (if (= \/ (last chroot))
-            (apply str (butlast chroot))
-            chroot)))
+        (dutil/remove-trailing-slash chroot)))
 
 (defn run-on-dir
     [dir chroot]
     (dutil/doall*
         (->> (dfs/specify-tree dir)
+             (dfs/translate-top-level)
              (dfs-util/chroot-tree chroot)
              (dfs-util/tree-map dfs/distribute-meta)
              (dext/pre-process)

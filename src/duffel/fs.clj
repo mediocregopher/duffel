@@ -2,7 +2,8 @@
     (:require [duffel.ext     :as dext]
               [duffel.meta    :as dmeta]
               [duffel.util    :as dutil]
-              [duffel.fs-util :as dfs-util])
+              [duffel.fs-util :as dfs-util]
+              [duffel.translation :as dtran])
     (:import java.io.File))
 
 
@@ -180,3 +181,17 @@
             (throw (Exception. (str "Could not parse _meta.json file in " 
                                     local-prefix ((first dir-tree) :full-name)
                                     ", it might not be valid json"))))))
+
+(defn translate-dir-tree
+    "Given a dir-tree, attempts to translate the root node's base-name"
+    [dir-tree]
+    (let [dir-struct (first dir-tree)
+          dir-struct-translated (assoc dir-struct :base-name
+                                    (dtran/translate-dir (dir-struct :base-name)))]
+        (cons dir-struct-translated (rest dir-tree))))
+
+(defn translate-top-level
+    "Given a dir-tree, goes through all top level directories and runs translate-dir-tree on
+    them"
+    [dir-tree]
+    (cons (first dir-tree) (map #(if (seq? %) (translate-dir-tree %) %) (rest dir-tree))))

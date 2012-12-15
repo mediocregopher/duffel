@@ -247,8 +247,7 @@ this is how the permissions for each item would end up:
 * /tmp/one/       -> owned by user2
 * /tmp/one/two.xt -> owned by user3
 
-## Special Folder Names (not done yet)
-**Special folder names haven't been implemented yet**
+## Special Folder Names
 
 There are special folder names you can use in the root of your duffel project which will map based on environment variables or even custom scripts.
 
