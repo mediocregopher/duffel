@@ -9,9 +9,7 @@
 
 (defn _tree [fo]
     (let [fo-ls (.listFiles fo)]
-        (cons (.getName fo) 
-            (->> (filter #(not (.isHidden %)) fo-ls)
-                 (map #(if (.isDirectory %) (_tree %) (.getName %)))))))
+        (cons (.getName fo) (map #(if (.isDirectory %) (_tree %) (.getName %)) fo-ls))))
 
 (defn tree [dir]
     (let [full-tree (_tree (File. dir))]
