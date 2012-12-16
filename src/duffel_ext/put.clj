@@ -39,9 +39,9 @@
     (let [ dir-tree-root (first dir-tree)
            meta-struct   (clean-meta-struct (dir-tree-root :meta {})) ]
     (cons dir-tree-root
-        (dfs-util/tree-map 
-            (fn [d _ _] (meta->dir-tree d meta-struct)) 
-            (rest dir-tree)))))
+        (rest (dfs-util/tree-map 
+                  (fn [d _ _] (meta->dir-tree d meta-struct)) 
+                  dir-tree)))))
 
 (deftype put-ext [] duffel-extension
 

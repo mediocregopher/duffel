@@ -14,7 +14,8 @@
                  (map #(if (.isDirectory %) (_tree %) (.getName %)))))))
 
 (defn tree [dir]
-    (_tree (File. dir)))
+    (let [full-tree (_tree (File. dir))]
+	(cons (dutil/remove-trailing-slash dir) (rest full-tree))))
 
 (def dot-underscore-split #"(.+)\._(.+)$")
 
