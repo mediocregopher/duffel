@@ -22,6 +22,7 @@
              (dfs/translate-top-level)
              (dfs-util/chroot-tree chroot)
              (dfs-util/tree-map dfs/distribute-meta)
+             (dfs-util/tree-map dfs/filter-git)
              (dext/pre-process)
              (dext/process-templates)
              (dext/post-template-process)

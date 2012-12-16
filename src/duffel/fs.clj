@@ -194,3 +194,8 @@
     them"
     [dir-tree]
     (cons (first dir-tree) (map #(if (seq? %) (translate-dir-tree %) %) (rest dir-tree))))
+
+(defn filter-git
+    "Function to be passed into tree-map which will remove all directories called .git"
+    [dir-tree _ _]
+    (remove #(and (seq? %) (= ((first %) :base-name) ".git")) dir-tree))
