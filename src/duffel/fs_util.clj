@@ -11,6 +11,11 @@
 
 (defn append-slash [dir-name] (str dir-name "/"))
 
+(defn path-split [path]
+    (rest (re-find #"(.+?)([^\/]*)$" path)))
+
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 ; I couldn't explain again how these work, but they do. You give tree-map a

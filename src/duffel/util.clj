@@ -39,3 +39,9 @@
     (if (= \/ (first dir-name))
         (apply str (rest dir-name))
         dir-name))
+
+(defn str->int
+    "Given a string, parses the first int out of it possible, or nil if none found"
+    [s]
+    (when-let [ sint (re-find #"[0-9]+" s) ]
+        (Integer. sint )))

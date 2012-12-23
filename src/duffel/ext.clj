@@ -52,7 +52,7 @@
     (gen-process-structs dir-tree postprocess-dir postprocess-file))
 
 (defn process
-    [dir-tree]
+    [app dir-tree]
     (dfs-util/tree-map 
         (fn [d abs-prefix local-prefix] 
             (let [ d-root         (first d)
@@ -61,9 +61,10 @@
                    d-local        (str local-prefix (d-root :full-name))
                    d-abs-prefix   (dfs-util/append-slash d-abs)
                    d-local-prefix (dfs-util/append-slash d-local) ]
-                (when-not (d-root :is-root?) (process-dir d-root-ext (d-root :meta) d-abs d-local))
+                (when-not (d-root :is-root?) (process-dir d-root-ext app (d-root :meta) d-abs d-local))
                 (doseq [f (rest d)] (when-not (seq? f) 
-                    (process-file (ext-instance f) (f :meta) 
+                    (process-file (ext-instance f) app 
+                                                   (f :meta) 
                                                    (str d-abs-prefix   (f :base-name)) 
                                                    (str d-local-prefix (f :full-name))))))
         d) 

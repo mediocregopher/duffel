@@ -1,7 +1,8 @@
 (ns duffel-ext.put
     (:use duffel.ext-protocol)
     (:require [duffel.fs-util :as dfs-util]
-              [duffel.ext     :as dext])
+              [duffel.ext     :as dext]
+              [duffel.backup  :as dbackup])
     (:import java.lang.System))
 
 (def default-username (java.lang.System/getProperty "user.name"))
@@ -71,7 +72,7 @@
                            (map #(if (seq? %) ((first %) :base-name) (% :base-name))))]
             (dfs-util/merge-meta-dir dir-struct {:tracked tracked})))
 
-    (process-dir [x meta-struct abs local]
+    (process-dir [x app meta-struct abs local]
         (println "mkdir" local "->" abs "::" 
             (meta-struct :chmod) (str (meta-struct :owner) ":" (meta-struct :group)))
         (dfs-util/mkdir-p abs)
@@ -94,9 +95,14 @@
                         (dfs-util/rm-rf full-path))))))
 
 
-    (process-file [x meta-struct abs local]
+    (process-file [x app meta-struct abs local]
+        (when-not (app :no-backup) 
+            (let [ [abs-dir filename] (dfs-util/path-split abs) ]
+                (dbackup/backup-file abs-dir filename (app :backup-dir) (app :backup-count))))
+
         (println "cp" local "->" abs "::" 
             (meta-struct :chmod) (str (meta-struct :owner) ":" (meta-struct :group)))
+
         (dfs-util/cp local abs)
         (dfs-util/chown (meta-struct :owner) (meta-struct :group) abs)
         (dfs-util/chmod (meta-struct :chmod) abs))

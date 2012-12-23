@@ -25,8 +25,8 @@
         "Called on a file-struct after the massage templates are applied, before actual 
         processing happens")
     
-    (process-dir [x meta-struct abs local]
+    (process-dir [x app meta-struct abs local]
         "Called for dir to do actual processing. This is where all the side-effects go")
 
-    (process-file [x meta-struct abs local]
+    (process-file [x app meta-struct abs local]
         "Called for a file to do actual processing. This is where all the side-effects go"))
