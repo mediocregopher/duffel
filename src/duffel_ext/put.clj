@@ -5,8 +5,9 @@
               [duffel.backup  :as dbackup])
     (:import java.lang.System))
 
-(def default-username (java.lang.System/getProperty "user.name"))
-(def default-group default-username)    ;Assume primary group = username, cause fuck it
+(def current-username (java.lang.System/getProperty "user.name"))
+(def default-username current-username)
+(def default-group    default-username) ;Assume primary group = username, cause fuck it
 
 (defn clean-meta-struct
     "We don't want these to ever propogate, so we can use this function to clean
@@ -44,6 +45,16 @@
                   (fn [d _ _] (meta->dir-tree d meta-struct)) 
                   dir-tree)))))
 
+(defn try-ownership
+    [abs meta-struct]
+    ;We try to do the ownership stuff, but if we can't and force_ownership isn't on
+    ;we don't worry about it
+    (try
+        (dfs-util/chown (meta-struct :owner) (meta-struct :group) abs)
+        (dfs-util/chmod (meta-struct :chmod) abs)
+    (catch Exception e
+        (when (meta-struct :force_ownership) (throw e)))))
+
 (deftype put-ext [] duffel-extension
 
     ;This one needed special attention, since a defmulti was the most efficient way to
@@ -77,13 +88,7 @@
             (meta-struct :chmod) (str (meta-struct :owner) ":" (meta-struct :group)))
         (dfs-util/mkdir-p abs)
 
-        ;We try to do the ownership stuff, but if we can't and force_ownership isn't on
-        ;we don't worry about it
-        (try
-            (dfs-util/chown (meta-struct :owner) (meta-struct :group) abs)
-            (dfs-util/chmod (meta-struct :chmod) abs)
-        (catch Exception e
-            (when (meta-struct :force_ownership) (throw e))))
+        (try-ownership abs meta-struct)
 
         (when (meta-struct :delete_untracked)
             (let [ tracked-files   (meta-struct :tracked)

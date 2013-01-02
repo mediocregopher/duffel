@@ -82,18 +82,21 @@
     [dir]
     (.mkdirs (java.io.File. dir)))
 
-(defn exec
-    "Executes a command, throws an exception if the command doesn't return
+(defn exec-in
+    "Executes a command in the given dir, throws an exception if the command doesn't return
     an exit code of 0"
-    [command & args]
+    [dir command & args]
     (let [runtime  (Runtime/getRuntime)
-          proc     (.exec runtime (into-array (cons command args)))
+          proc     (.exec runtime (into-array (cons command args)) nil (File. dir))
           proc-ret (.waitFor proc)]
         (if (= 0 proc-ret)
             (slurp (.getInputStream proc))
             (throw (Exception. (slurp (.getErrorStream proc)))))))
 
-        
+(defn exec
+    "Executes a command in cwd"
+    [command & args]
+    (apply exec-in (concat ["." command] args)))
 
 (defn chmod 
     "Calls chmod on a file/directory"
