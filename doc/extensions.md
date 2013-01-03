@@ -44,6 +44,9 @@ they can take in.
 
 ## Extension list
 
-Currently there's only one extension, ```put```. It puts files/folders. You can read the main README
-page for an explanation of how it works (remember, if the extension is specified, ```put``` is used
+There's one main extension, ```put```. It puts files/folders. You can read the main README
+page for an explanation of how it works (remember, if the extension isn't specified, ```put``` is used
 automatically).
+
+Here are a list of other extensions which have been written thus far:
+* [git](git.md)

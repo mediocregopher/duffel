@@ -3,7 +3,7 @@
 ## Basic Usage
 
 Duffel is a standalone executable which will automatically deploy a directory structure to your machine. You can
-download the exectuable [here](https://raw.github.com/mediocregopher/duffel/master/duffel). Put it so that it's in
+download the executable [here](https://raw.github.com/mediocregopher/duffel/master/duffel). Put it so that it's in
 your path and is executable. When you run it the first time it will download the duffel jar for you, and from then
 on you can call ```duffel``` and it will automatically load up the duffel jar and pass all cli arguments through to
 it.
