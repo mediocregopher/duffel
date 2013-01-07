@@ -1,7 +1,7 @@
 # git extension
 
 The git extension makes it possible to initialize and set up git repos in folders of your choosing.
-To use it apply the git extension to a folder of your choosing. 
+To use it apply the git extension to a folder in your duffel repo.
 
 ## Usage
 
@@ -18,16 +18,9 @@ another user in that case.
 
 The git extension also supports put's `owner`, `group`, and `chmod`. These will only be applied to the
 top level folder, all sub-files and sub-folders will be owned by whichever user is specified with the
-`git_user` parameter. A weird side-effect of this is that if you're running duffel as root, and you
-want the entire project including the top-level directory of it to be owned by some user, you need to
-specify that user for `git_user`, `owner`, and `group`. The `owner` and `group` ensure that the top-
-level directory is owned by the desired user. This is sucks and I want to change it, I just need to
-think of how.
+`git_user` parameter.
 
 ## Example
-
-Given the following structure:
-
 
 Given the following directory structure:
 ```
@@ -44,9 +37,7 @@ with `_meta.json` containing:
 {
     "." : { "git_url" : "https://github.com/mediocregopher/duffel.git",
             "git_branch" : "master",
-            "git_user" : "mediocregopher",
-            "owner" : "mediocregopher",
-            "group" : "mediocregopher" }
+            "git_user" : "mediocregopher" }
 }
 ```
 

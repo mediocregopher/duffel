@@ -57,6 +57,11 @@
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn get-dir-meta
+    "Given a dir-tree and a key, gets that key from the meta for the root"
+    [dir-tree meta-key]
+    (((first dir-tree) :meta) meta-key))
+
 (defn merge-meta
     "Given a file-struct and some metadata merges the file-struct's meta field
     with the given metadata"

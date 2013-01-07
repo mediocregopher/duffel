@@ -18,7 +18,12 @@
 (deftype git_ext [] duffel-extension
 
     (preprocess-file [x file-tree] file-tree)
-    (preprocess-dir  [x dir-tree]  dir-tree)
+    (preprocess-dir  [x dir-tree]
+        (if-let [git-user (dfs-util/get-dir-meta dir-tree :git_user)]
+            (let [dt-with-owner (dfs-util/merge-meta-dir-reverse dir-tree {:owner git-user})
+                  owner         (dfs-util/get-dir-meta dt-with-owner :owner)]
+                (dfs-util/merge-meta-dir-reverse dt-with-owner {:group owner}))
+            dir-tree))
 
     (file-meta-tpl [x] {})
     (dir-meta-tpl  [x]
