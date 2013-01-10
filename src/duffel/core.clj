@@ -6,7 +6,8 @@
               [duffel.ext     :as dext]
               [duffel.fs-util :as dfs-util]
               duffel-ext.put
-              duffel-ext.git))
+              duffel-ext.git
+              duffel-ext.ignore))
 
 (defn parse-chroot
     "Make sure that chroot is properly formed"

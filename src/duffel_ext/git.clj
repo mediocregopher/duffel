@@ -15,7 +15,7 @@
             :else
                 (throw (Exception. (str "Could not switch user to " git-user))))))
 
-(deftype git_ext [] duffel-extension
+(deftype git-ext [] duffel-extension
 
     (preprocess-file [x file-tree] file-tree)
     (preprocess-dir  [x dir-tree]
@@ -63,4 +63,4 @@
     ) 
 )
 
-(dext/register-ext "git" (->git_ext))
+(dext/register-ext "git" (->git-ext))
