@@ -90,7 +90,7 @@ With the following directory structure:
 ```
 
 This will check if the box is a member of ```nodegroup1```, etc... and place the individual file accordingly. This check is done by calling
-the [is-in-group](/mediocregopher/duffel/blob/master/doc/scripts/is-in-group) script.
+the [is-in-group](/mediocregopher/duffel/blob/master/doc/scripts/is-in-group.md) script.
 
 ## Matching priority
 
