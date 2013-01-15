@@ -50,3 +50,5 @@ automatically).
 
 Here are a list of other extensions which have been written thus far:
 * [git](git.md)
+* [ignore](ignore.md)
+* [touch](touch.md)

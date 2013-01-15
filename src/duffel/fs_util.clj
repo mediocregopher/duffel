@@ -128,6 +128,10 @@
     [filedir]
     (exec "rm" "-rf" filedir))
 
+(defn touch
+    [file]
+    (exec "touch" file))
+
 (defn exists
     "Returns true or false for whether or not the given file exists"
     [file]

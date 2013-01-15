@@ -1,0 +1,26 @@
+(ns duffel-ext.put
+    (:use duffel.ext-protocol)
+    (:require [duffel.fs-util :as dfs-util]
+              [duffel.ext     :as dext]
+              [duffel-ext.put :as dput]))
+
+(deftype touch-ext [] duffel-extension
+    (preprocess-file [x file-tree] file-tree)
+    (preprocess-dir [x dir-tree] dir-tree)
+
+    (file-meta-tpl [x] (file-meta-tpl (dput/->put-ext)))
+    (dir-meta-tpl [x] {})
+
+    (postprocess-file [x file-struct] file-struct)
+    (postprocess-dir [x dir-struct] dir-struct)
+
+    (process-file [x app meta-struct abs local]
+        (dput/print-fs-action "touch" local abs meta-struct)
+        (dfs-util/touch abs)
+        (dput/try-ownership abs meta-struct))
+
+    (process-dir [x app meta-struct abs local]
+        (throw (Exception. "touch exception doesn't support handling directories")))
+)
+
+(dext/register-ext "touch" (->touch-ext))

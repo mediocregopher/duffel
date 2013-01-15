@@ -55,6 +55,10 @@
     (catch Exception e
         (when (meta-struct :force_ownership) (throw e)))))
 
+(defn print-fs-action [action local abs meta-struct]
+    (println action local "->" abs "::" 
+        (meta-struct :chmod) (str (meta-struct :owner) ":" (meta-struct :group))))
+
 (deftype put-ext [] duffel-extension
 
     ;This one needed special attention, since a defmulti was the most efficient way to
@@ -84,10 +88,9 @@
             (dfs-util/merge-meta-dir dir-struct {:tracked tracked})))
 
     (process-dir [x app meta-struct abs local]
-        (println "mkdir" local "->" abs "::" 
-            (meta-struct :chmod) (str (meta-struct :owner) ":" (meta-struct :group)))
-        (dfs-util/mkdir-p abs)
+        (print-fs-action "mkdir" local abs meta-struct)
 
+        (dfs-util/mkdir-p abs)
         (try-ownership abs meta-struct)
 
         (when (meta-struct :delete_untracked)
@@ -105,8 +108,7 @@
             (let [ [abs-dir filename] (dfs-util/path-split abs) ]
                 (dbackup/backup-file abs-dir filename (app :backup-dir) (app :backup-count))))
 
-        (println "cp" local "->" abs "::" 
-            (meta-struct :chmod) (str (meta-struct :owner) ":" (meta-struct :group)))
+        (print-fs-action "cp" local abs meta-struct)
 
         (dfs-util/cp local abs)
         (dfs-util/chown (meta-struct :owner) (meta-struct :group) abs)
