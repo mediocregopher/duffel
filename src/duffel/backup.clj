@@ -47,6 +47,6 @@
     [abs-dir filename backup-dir backup-count]
     (setup-backup-dir backup-dir)
     (doall (prepare-backup abs-dir filename backup-dir backup-count))
-    (when (and (> backup-count 0) (dfs-util/exists (str abs-dir filename)))
+    (when (and (> backup-count 0) (dfs-util/exists? (str abs-dir filename)))
         (dfs-util/cp (str abs-dir filename)
                      (str (prepend-backup abs-dir backup-dir) (append-timestamp filename)))))

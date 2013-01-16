@@ -132,7 +132,7 @@
     [file]
     (exec "touch" file))
 
-(defn exists
+(defn exists?
     "Returns true or false for whether or not the given file exists"
     [file]
     (.exists (File. file)))

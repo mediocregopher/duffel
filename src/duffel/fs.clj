@@ -3,7 +3,8 @@
               [duffel.meta    :as dmeta]
               [duffel.util    :as dutil]
               [duffel.fs-util :as dfs-util]
-              [duffel.translation :as dtran])
+              [duffel.translation :as dtran]
+              [duffel.script  :as dscript])
     (:import java.io.File))
 
 
@@ -45,12 +46,16 @@
 (defn hostname-matches [hostname]
     (= my-hostname hostname))
 
-(defn index-of-specified-entry [host-seq]
+(defn groupname-matches [proj-root groupname]
+    (dscript/is-in-group? proj-root groupname))
+
+(defn index-of-specified-entry [proj-root host-seq]
     "Given a list of host specifiers, returns index of most specific one, or nil
     if none match"
     (dutil/thread-until host-seq
         (partial dutil/index-when fdqn-matches)
         (partial dutil/index-when hostname-matches)
+        (partial dutil/index-when #(groupname-matches proj-root %))
         (partial dutil/index-when #(= "_default" %))))
 
 (defmulti explode-file seq?)
@@ -95,9 +100,9 @@
 (defn narrow-group
     "Given a list of file-structs, returns the struct with the most specific
     specifier"
-    [group-seq]
+    [proj-root group-seq]
     (let [specifiers (map #(% :specifier) group-seq)]
-        (when-let [i (index-of-specified-entry specifiers)]
+        (when-let [i (index-of-specified-entry proj-root specifiers)]
             (nth group-seq i))))
 
 (declare specify-files)
@@ -105,9 +110,9 @@
     "If file-struct has :dir-ls then it is a directory. Call specify-files
     on the value at :dir-ls, then cons the file-struct (with :dir-ls dissociated)
     to the front."
-    [file-struct]
+    [proj-root file-struct]
     (if (contains? file-struct :dir-ls)
-        (cons (dissoc file-struct :dir-ls) (specify-files (file-struct :dir-ls)))
+        (cons (dissoc file-struct :dir-ls) (specify-files proj-root (file-struct :dir-ls)))
         file-struct))
 
 (defn specify-files 
@@ -115,14 +120,14 @@
     all the steps needed to narrow down which files we want to actually use for this
     particular node, and identifies which extension we want to process them with.
     Returns a list of file-structs"
-    [file-list]
+    [proj-root file-list]
     (->> file-list
-         (map explode-file)                 ; - Explode the files into their file-struct's
-         (remove #(empty? (% :base-name)))  ; - Remove ones with empty base-names (shouldn't really happen)
-         (reduce add-to-basename-group {})  ; - Reduce the structs by basename into a grouplist map
-         (map #(narrow-group (val %)))      ; - Take all the vals in the grouplist map and narrow them down to a single file-struct
-         (remove nil?)                      ; - narrow-group returns nil if group can't be narrowed, remove those nils
-         (map directory-consolidate)))      ; - Call specify files on the file list of all directory structs
+         (map explode-file)                                ; - Explode the files into their file-struct's
+         (remove #(empty? (% :base-name)))                 ; - Remove ones with empty base-names (shouldn't really happen)
+         (reduce add-to-basename-group {})                 ; - Reduce the structs by basename into a grouplist map
+         (map #(narrow-group proj-root (val %)))           ; - Take all the vals in the grouplist map and narrow them down to a single file-struct
+         (remove nil?)                                     ; - narrow-group returns nil if group can't be narrowed, remove those nils
+         (map (partial directory-consolidate proj-root)))) ; - Call specify files on the file list of all directory structs
 
 (defn specify-tree
     "Since specify-files expects simply a list of files, not a '(dir & files)
@@ -131,7 +136,7 @@
     [dir]
     (->> (tree dir)
          (list)
-         (specify-files)
+         (specify-files dir)
          (first)))
 
 (defn basename-is?
@@ -194,6 +199,11 @@
     them"
     [dir-tree]
     (cons (first dir-tree) (map #(if (seq? %) (translate-dir-tree %) %) (rest dir-tree))))
+
+(defn remove-special-dirs
+    [dir-tree]
+    (cons (first dir-tree)
+          (remove #(and (seq? %) (dtran/is-special? ((first %) :base-name))) (rest dir-tree))))
 
 (defn filter-git
     "Function to be passed into tree-map which will remove all directories called .git"

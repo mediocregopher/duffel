@@ -43,7 +43,7 @@
               git-user   (meta-struct :git_user)
               git-branch (meta-struct :git_branch)]
              
-            (if-not (dfs-util/exists abs)
+            (if-not (dfs-util/exists? abs)
                 (do
                     (println "Cloning" git-url "into" abs) (flush)
                     (git-exec-dir git-user "." "clone" git-url abs))

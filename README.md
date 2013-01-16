@@ -76,15 +76,14 @@ You can apply the same to directories as well:
 Will put ```/tmp/one/``` with ```green.txt``` in it if the host's name is ```hostname1```, and ```blue.txt```
 otherwise.
 
-## Per-group files (not done yet)
-**Per-group files haven't been implemented yet**
+## Per-group files
 
 With the following directory structure:
 ```
 /opt/my-duffel/
     tmp/
-        one.txt._g_nodegroup1
-        one.txt._g_nodegroup2
+        one.txt._nodegroup1
+        one.txt._nodegroup2
         one.txt._hostname1
         one.txt.__default
 ```

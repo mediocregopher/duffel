@@ -1,4 +1,4 @@
-(defproject duffel "0.11"
+(defproject duffel "0.12"
   :description "Duffel is a standalone executable which will automatically deploy a directory structure to your machine"
   :url "https://github.com/mediocregopher/duffel"
   :license {:name "Eclipse Public License"
