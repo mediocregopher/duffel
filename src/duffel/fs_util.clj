@@ -1,4 +1,5 @@
 (ns duffel.fs-util
+    (:require [duffel.util :as dutil])
     (:import java.io.File))
 
 (defn chroot-tree
@@ -8,13 +9,6 @@
     string"
     (let [root-node  (first dir-tree)]
         (cons (assoc root-node :base-name root :is-root? true) (rest dir-tree))))
-
-(defn append-slash [dir-name] (str dir-name "/"))
-
-(defn path-split [path]
-    (rest (re-find #"(.+?)([^\/]*)$" path)))
-
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
@@ -42,8 +36,8 @@
     (let [ new-dir-tree      (user-fn dir-tree abs local)
            new-dir-tree-node (first new-dir-tree)
            new-dir-base-name (new-dir-tree-node :base-name)
-           new-abs           (append-slash (str abs   (new-dir-tree-node :base-name)))
-           new-local         (append-slash (str local (new-dir-tree-node :full-name))) ]
+           new-abs           (dutil/append-slash (str abs   (new-dir-tree-node :base-name)))
+           new-local         (dutil/append-slash (str local (new-dir-tree-node :full-name))) ]
         (map #(if (seq? %)
                   (_tree-map user-fn % new-abs new-local)
                   %)

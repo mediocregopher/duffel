@@ -1,16 +1,15 @@
 (ns duffel-ext.git
     (:use duffel.ext-protocol)
-    (:require [duffel.fs-util :as dfs-util]
-              [duffel.ext     :as dext]
-              [duffel.backup  :as dbackup])
-    (:require [duffel-ext.put :as dput]))
+    (:require [duffel.fs-util  :as dfs-util]
+              [duffel.ext      :as dext]
+              [duffel.ext-util :as dext-util]))
 
 (defn git-exec-dir [git-user dir & args]
     (let [command-args (cons "git" args)]
         (cond
-            (= git-user dput/current-username)
+            (= git-user dext-util/current-username)
                 (apply dfs-util/exec-in dir command-args)
-            (= "root" dput/current-username)
+            (= "root" dext-util/current-username)
                 (apply dfs-util/exec-in dir "sudo" "-u" git-user command-args)
             :else
                 (throw (Exception. (str "Could not switch user to " git-user))))))
@@ -27,9 +26,9 @@
 
     (file-meta-tpl [x] {})
     (dir-meta-tpl  [x]
-        (merge (dir-meta-tpl (dput/->put-ext))
+        (merge dext-util/dir-ownership-tpl
             { :git_url    (list :string)
-              :git_user   (list :string (list :optional dput/default-username))
+              :git_user   (list :string (list :optional dext-util/default-username))
               :git_branch (list :string (list :optional false)) }))
 
     (postprocess-file [x file-struct] file-struct)
@@ -59,7 +58,7 @@
                     (throw (Exception. 
                         (str "Git project at " abs " is not clean, can't checkout branch")))))
 
-            (dput/try-ownership abs meta-struct))
+            (dext-util/try-ownership abs meta-struct))
     ) 
 )
 

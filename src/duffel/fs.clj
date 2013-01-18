@@ -170,7 +170,7 @@
     [dir-tree local-prefix]
     (if-let [meta-file (some #(when (basename-is? % "_meta.json") %) dir-tree)]
         [ (remove #(basename-is? % "_meta.json") dir-tree)
-          (slurp (str local-prefix (dfs-util/append-slash ((first dir-tree) :full-name)) (meta-file :full-name))) ]
+          (slurp (str local-prefix (dutil/append-slash ((first dir-tree) :full-name)) (meta-file :full-name))) ]
         [ dir-tree "{}" ]))
 
 (defn distribute-meta

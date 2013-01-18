@@ -40,6 +40,11 @@
         (apply str (rest dir-name))
         dir-name))
 
+(defn append-slash [dir-name] (str dir-name "/"))
+
+(defn path-split [path]
+    (rest (re-find #"(.+?)([^\/]*)$" path)))
+
 (defn str->int
     "Given a string, parses the first int out of it possible, or nil if none found"
     [s]

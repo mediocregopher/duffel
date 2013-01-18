@@ -1,13 +1,11 @@
 (ns duffel-ext.put
     (:use duffel.ext-protocol)
-    (:require [duffel.fs-util :as dfs-util]
-              [duffel.ext     :as dext]
-              [duffel.backup  :as dbackup])
+    (:require [duffel.fs-util  :as dfs-util]
+              [duffel.util     :as dutil]
+              [duffel.ext      :as dext]
+              [duffel.backup   :as dbackup]
+              [duffel.ext-util :as dext-util])
     (:import java.lang.System))
-
-(def current-username (java.lang.System/getProperty "user.name"))
-(def default-username current-username)
-(def default-group    default-username) ;Assume primary group = username, cause fuck it
 
 (defn clean-meta-struct
     "We don't want these to ever propogate, so we can use this function to clean
@@ -21,7 +19,6 @@
     [dir-tree meta-struct]
     (map #(if (seq? %) (dfs-util/merge-meta-dir-reverse % meta-struct)
                        (dfs-util/merge-meta-reverse % meta-struct)) dir-tree))
-
 
 (defmulti _preprocess-dir
     (fn [dir-tree] 
@@ -45,35 +42,17 @@
                   (fn [d _ _] (meta->dir-tree d meta-struct)) 
                   dir-tree)))))
 
-(defn try-ownership
-    [abs meta-struct]
-    ;We try to do the ownership stuff, but if we can't and force_ownership isn't on
-    ;we don't worry about it
-    (try
-        (dfs-util/chown (meta-struct :owner) (meta-struct :group) abs)
-        (dfs-util/chmod (meta-struct :chmod) abs)
-    (catch Exception e
-        (when (meta-struct :force_ownership) (throw e)))))
-
-(defn print-fs-action [action local abs meta-struct]
-    (println action local "->" abs "::" 
-        (meta-struct :chmod) (str (meta-struct :owner) ":" (meta-struct :group))))
-
 (deftype put-ext [] duffel-extension
 
     ;This one needed special attention, since a defmulti was the most efficient way to
     ;implement it
     (preprocess-dir [x dir-tree] (_preprocess-dir dir-tree))
 
-    (file-meta-tpl [x]
-        { :chmod (list :string (list :optional "0644") '(:regex #"^[0-7]{3,4}$"))
-          :owner (list :string (list :optional default-username)             )
-          :group (list :string (list :optional default-group)                ) })
+    (file-meta-tpl [x] dext-util/file-ownership-tpl)
 
     (dir-meta-tpl [x]
-        (merge (file-meta-tpl x)
-           { :chmod (list :string (list :optional "0755") '(:regex #"^[0-7]{3,4}$")) 
-             :delete_untracked  '(:bool (:optional false))
+        (merge dext-util/dir-ownership-tpl
+           { :delete_untracked  '(:bool (:optional false))
              :force_ownership   '(:bool (:optional false)) }))
 
     ;These just return what they're given, no changed to the structs in these stages
@@ -88,10 +67,10 @@
             (dfs-util/merge-meta-dir dir-struct {:tracked tracked})))
 
     (process-dir [x app meta-struct abs local]
-        (print-fs-action "mkdir" local abs meta-struct)
+        (dext-util/print-fs-action "mkdir" local abs meta-struct)
 
         (dfs-util/mkdir-p abs)
-        (try-ownership abs meta-struct)
+        (dext-util/try-ownership abs meta-struct)
 
         (when (meta-struct :delete_untracked)
             (let [ tracked-files   (meta-struct :tracked)
@@ -105,10 +84,10 @@
 
     (process-file [x app meta-struct abs local]
         (when-not (app :no-backup) 
-            (let [ [abs-dir filename] (dfs-util/path-split abs) ]
+            (let [ [abs-dir filename] (dutil/path-split abs) ]
                 (dbackup/backup-file abs-dir filename (app :backup-dir) (app :backup-count))))
 
-        (print-fs-action "cp" local abs meta-struct)
+        (dext-util/print-fs-action "cp" local abs meta-struct)
 
         (dfs-util/cp local abs)
         (dfs-util/chown (meta-struct :owner) (meta-struct :group) abs)
