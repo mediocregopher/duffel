@@ -89,7 +89,7 @@ With the following directory structure:
 ```
 
 This will check if the box is a member of ```nodegroup1```, etc... and place the individual file accordingly. This check is done by calling
-the [is-in-group](/mediocregopher/duffel/blob/master/doc/scripts/is-in-group.md) script.
+the [is-in-group](/master/doc/scripts/is-in-group.md) script.
 
 ## Matching priority
 
@@ -214,7 +214,7 @@ this is how the permissions for each item would end up:
 
 Everything meta-data related that's been documented thus-far is actually handled by the ```put``` extension (psych!). 
 Other extensions have different behaviors and purposes. Check out the
-[Extensions](/mediocregopher/duffel/blob/master/doc/extensions/extensions.md) page for more
+[Extensions](/master/doc/extensions/extensions.md) page for more
 info on how to use them and what extensions are available.
 
 ## Special Folder Names
