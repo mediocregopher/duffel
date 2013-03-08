@@ -8,7 +8,8 @@
               duffel-ext.put
               duffel-ext.git
               duffel-ext.ignore
-              duffel-ext.touch))
+              duffel-ext.touch
+              duffel-ext.clerb))
 
 (defn parse-chroot
     "Make sure that chroot is properly formed"

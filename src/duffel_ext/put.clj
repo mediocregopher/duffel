@@ -4,8 +4,7 @@
               [duffel.util     :as dutil]
               [duffel.ext      :as dext]
               [duffel.backup   :as dbackup]
-              [duffel.ext-util :as dext-util])
-    (:import java.lang.System))
+              [duffel.ext-util :as dext-util]))
 
 (defn clean-meta-struct
     "We don't want these to ever propogate, so we can use this function to clean
@@ -83,15 +82,10 @@
 
 
     (process-file [x app meta-struct abs local]
-        (when-not (app :no-backup) 
-            (let [ [abs-dir filename] (dutil/path-split abs) ]
-                (dbackup/backup-file abs-dir filename (app :backup-dir) (app :backup-count))))
-
+        (dext-util/try-backup app abs)
         (dext-util/print-fs-action "cp" local abs meta-struct)
-
         (dfs-util/cp local abs)
-        (dfs-util/chown (meta-struct :owner) (meta-struct :group) abs)
-        (dfs-util/chmod (meta-struct :chmod) abs))
+        (dext-util/force-ownership abs meta-struct))
 
 )
 

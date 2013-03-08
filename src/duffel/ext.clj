@@ -1,7 +1,8 @@
 (ns duffel.ext
     (:use massage.json)
     (:use duffel.ext-protocol)
-    (:require [duffel.fs-util :as dfs-util]))
+    (:require [duffel.fs-util :as dfs-util]
+              [duffel.util    :as dutil]))
 
 (def extensions (atom {}))
 
@@ -59,8 +60,8 @@
                    d-root-ext     (ext-instance d-root)
                    d-abs          (str abs-prefix   (d-root :base-name))
                    d-local        (str local-prefix (d-root :full-name))
-                   d-abs-prefix   (dfs-util/append-slash d-abs)
-                   d-local-prefix (dfs-util/append-slash d-local) ]
+                   d-abs-prefix   (dutil/append-slash d-abs)
+                   d-local-prefix (dutil/append-slash d-local) ]
                 (when-not (d-root :is-root?) (process-dir d-root-ext app (d-root :meta) d-abs d-local))
                 (doseq [f (rest d)] (when-not (seq? f) 
                     (process-file (ext-instance f) app 
@@ -101,7 +102,7 @@
         (let [ dir-root (first d)
                dir-rest (rest d)
                full-local-prefix (str local-prefix 
-                                      (dfs-util/append-slash (dir-root :full-name))) ]
+                                      (dutil/append-slash (dir-root :full-name))) ]
             (cons (try-apply-template dir-root full-local-prefix)
                   (map #(if (seq? %) % 
                             (try-apply-template % full-local-prefix)) dir-rest)))

@@ -20,7 +20,7 @@
         (dext-util/try-ownership abs meta-struct))
 
     (process-dir [x app meta-struct abs local]
-        (throw (Exception. "touch exception doesn't support handling directories")))
+        (throw (Exception. "touch extension doesn't support handling directories")))
 )
 
 (dext/register-ext "touch" (->touch-ext))
