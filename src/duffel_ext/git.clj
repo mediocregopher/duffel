@@ -29,7 +29,7 @@
         (merge dext-util/dir-ownership-tpl
             { :git_url    (list :string)
               :git_user   (list :string (list :optional dext-util/default-username))
-              :git_branch (list :string (list :optional false)) }))
+              :git_branch (list :string (list :optional "master")) }))
 
     (postprocess-file [x file-struct] file-struct)
     (postprocess-dir  [x dir-struct]  dir-struct)
@@ -48,15 +48,14 @@
                     (git-exec-dir git-user "." "clone" git-url abs))
                 (println abs "already exists, not cloning into it"))
             
-            (when git-branch
-                (if (re-find #"working directory clean" (git-exec-dir git-user abs "status"))
-                    (do
-                        (println "Checking out" abs "to" git-branch "branch") (flush)
-                        (git-exec-dir git-user abs "checkout" git-branch)
-                        (git-exec-dir git-user abs "fetch")
-                        (git-exec-dir git-user abs "reset" "--hard" (str "origin/" git-branch)))
-                    (throw (Exception. 
-                        (str "Git project at " abs " is not clean, can't checkout branch")))))
+            (if (re-find #"working directory clean" (git-exec-dir git-user abs "status"))
+                (do
+                    (println "Checking out" abs "to" git-branch "branch") (flush)
+                    (git-exec-dir git-user abs "checkout" git-branch)
+                    (git-exec-dir git-user abs "fetch")
+                    (git-exec-dir git-user abs "reset" "--hard" (str "origin/" git-branch)))
+                (throw (Exception.
+                    (str "Git project at " abs " is not clean, can't checkout branch"))))
 
             (dext-util/try-ownership abs meta-struct))
     ) 
