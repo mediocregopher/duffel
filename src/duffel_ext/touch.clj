@@ -15,9 +15,11 @@
     (postprocess-dir [x dir-struct] dir-struct)
 
     (process-file [x app meta-struct abs local]
-        (dext-util/print-fs-action "touch" local abs meta-struct)
-        (dfs-util/touch abs)
-        (dext-util/try-ownership abs meta-struct))
+        (when-not (and (dfs-util/exists? abs)
+                       (dext-util/perm-same? abs meta-struct))
+            (dext-util/print-fs-action "touch" local abs meta-struct)
+            (dfs-util/touch abs)
+            (dext-util/try-ownership abs meta-struct)))
 
     (process-dir [x app meta-struct abs local]
         (throw (Exception. "touch extension doesn't support handling directories")))

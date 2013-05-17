@@ -1,4 +1,5 @@
 (ns duffel.fs-util
+    (:use [clojure.string :only [split trim]])
     (:require [duffel.util :as dutil])
     (:import java.io.File))
 
@@ -130,3 +131,17 @@
     "Returns true or false for whether or not the given file exists"
     [file]
     (.exists (File. file)))
+
+(defn permissions
+    "Returns vector of file permissions, [full-octal owner group], where
+    full-octal is the four number octal sequenct of the permissions (0755, 1655, etc...)"
+    [file]
+    (let [perm-str (trim (exec "stat" "-c" "%a %U %G" file))
+          [perm owner group] (split perm-str #" ")]
+        [(dutil/full-octal perm) owner group]))
+
+(defn exact?
+    "Returns true or false for if the two given files have the exact same contents"
+    [file-a file-b]
+    (try (exec "cmp" file-a file-b) true
+    (catch Exception e false)))

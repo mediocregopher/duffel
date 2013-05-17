@@ -66,10 +66,10 @@
             (dfs-util/merge-meta-dir dir-struct {:tracked tracked})))
 
     (process-dir [x app meta-struct abs local]
-        (dext-util/print-fs-action "mkdir" local abs meta-struct)
-
-        (dfs-util/mkdir-p abs)
-        (dext-util/try-ownership abs meta-struct)
+        (when-not (dext-util/dirs-no-difference? local abs meta-struct)
+            (dext-util/print-fs-action "mkdir" local abs meta-struct)
+            (dfs-util/mkdir-p abs)
+            (dext-util/try-ownership abs meta-struct))
 
         (when (meta-struct :delete_untracked)
             (let [ tracked-files   (meta-struct :tracked)
@@ -77,15 +77,16 @@
                    untracked       (apply disj (cons present-files tracked-files)) ]
                 (doseq [filedir untracked]
                     (let [full-path (str abs "/" filedir)]
-                        (println "Deleting" full-path)
+                        (println "rm" full-path)
                         (dfs-util/rm-rf full-path))))))
 
 
     (process-file [x app meta-struct abs local]
-        (dext-util/try-backup app abs)
-        (dext-util/print-fs-action "cp" local abs meta-struct)
-        (dfs-util/cp local abs)
-        (dext-util/force-ownership abs meta-struct))
+        (when-not (dext-util/files-no-difference? local abs meta-struct)
+            (dext-util/try-backup app abs)
+            (dext-util/print-fs-action "cp" local abs meta-struct)
+            (dfs-util/cp local abs)
+            (dext-util/force-ownership abs meta-struct)))
 
 )
 

@@ -22,10 +22,14 @@
         (throw (Exception. "clerb extension doesn't support handling directories")))
 
     (process-file [x app meta-struct abs local]
-        (dext-util/try-backup app abs)
-        (dext-util/print-fs-action "clerb" local abs meta-struct)
-        (spit abs (clerb-file local))
-        (dext-util/force-ownership abs meta-struct))
+        (let [tpl-parsed (clerb-file local)]
+            (when-not (and (dfs-util/exists? abs)
+                           (= tpl-parsed (slurp abs))
+                           (dext-util/perm-same? abs meta-struct))
+                (dext-util/try-backup app abs)
+                (dext-util/print-fs-action "clerb" local abs meta-struct)
+                (spit abs (clerb-file local))
+                (dext-util/force-ownership abs meta-struct))))
 )
 
 (dext/register-ext "clerb" (->clerb-ext))

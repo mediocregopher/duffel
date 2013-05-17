@@ -35,6 +35,26 @@
         (let [ [abs-dir filename] (dutil/path-split abs) ]
             (dbackup/backup-file abs-dir filename (app :backup-dir) (app :backup-count)))))
 
+(defn perm-same?
+    "Looks at a pre-existing file/dir and the meta-struct that's going to be applied to it, and
+    returns true/false if the existing permissions are different"
+    [abs meta-struct]
+    (let [local-perms [ (dutil/full-octal (meta-struct :chmod))
+                        (meta-struct :owner)
+                        (meta-struct :group) ]]
+        (= local-perms (dfs-util/permissions abs))))
+
+(defn dirs-no-difference?
+    [local abs meta-struct]
+    (and (dfs-util/exists? abs)
+         (perm-same? abs meta-struct)))
+
+(defn files-no-difference?
+    [local abs meta-struct]
+    (and (dfs-util/exists? abs)
+         (perm-same? abs meta-struct)
+         (dfs-util/exact? local abs)))
+
 (defn print-fs-action [action local abs meta-struct]
     (println action local "->" abs "::" 
         (meta-struct :chmod) (str (meta-struct :owner) ":" (meta-struct :group))))

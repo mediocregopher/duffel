@@ -10,10 +10,8 @@
     (dir-meta-tpl [x] {})
     (postprocess-file [x file-struct] file-struct)
     (postprocess-dir [x dir-struct] dir-struct)
-    (process-file [x app meta-struct abs local]
-        (println "Ignoring" abs))
-    (process-dir [x app meta-struct abs local]
-        (println "Ignoring" abs))
+    (process-file [x app meta-struct abs local] nil)
+    (process-dir [x app meta-struct abs local] nil)
 )
 
 (dext/register-ext "ignore" (->ignore-ext))
