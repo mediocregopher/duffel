@@ -5,7 +5,10 @@
 (deftype ignore-ext [] duffel-extension
 
     (preprocess-file [x file-tree] file-tree)
-    (preprocess-dir [x dir-tree] dir-tree)
+    (preprocess-dir [x dir-tree]
+        ;We want to ignore anything that's inside an ignore'd directory,
+        ;so we only keep the head of the tree
+        (list (first dir-tree)))
     (file-meta-tpl [x] {})
     (dir-meta-tpl [x] {})
     (postprocess-file [x file-struct] file-struct)
