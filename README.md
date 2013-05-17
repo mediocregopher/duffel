@@ -145,6 +145,29 @@ The ```_meta.json``` file could look like:
 }
 ```
 
+The filename can be a glob where ```*``` matches zero or more characters. For instance, given the
+following structure:
+```
+/opt/my-duffel/
+    tmp/
+        _meta.json
+        file1.txt
+        file2.txt
+        file3.txt
+        other.txt
+```
+
+If the ```_meta.json``` file looked like:
+```json
+{
+    "file*.txt" : { "owner":"notroot" }
+}
+```
+
+then file1.txt, file2.txt, and file3.txt would have their owner set to ```notroot```.
+
+*Note: Behavior when more than one glob matches a single file is undefined!*
+
 If you set owner but not group, by default the group name set will be the same as the owner name. The owner defaults to whatever user is
 running the duffel process if it's not set. Chmod defaults to 0644 for files and 0755 for directories.
 

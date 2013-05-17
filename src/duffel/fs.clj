@@ -4,7 +4,8 @@
               [duffel.util    :as dutil]
               [duffel.fs-util :as dfs-util]
               [duffel.translation :as dtran]
-              [duffel.script  :as dscript])
+              [duffel.script  :as dscript]
+              [clojure.string :as s])
     (:import java.io.File))
 
 
@@ -139,23 +140,25 @@
          (specify-files dir)
          (first)))
 
-(defn basename-is?
-    [file-struct filename]
-    (and (not (seq? file-struct)) (= (file-struct :base-name) filename)))
+(defn basename-matches?
+    [file-struct fileglob]
+    (let [regex-str (s/replace fileglob "*" ".*")
+          regex (re-pattern regex-str)]
+        (and (not (seq? file-struct))
+             (not (nil? (re-find regex (file-struct :base-name)))))
+    ))
 
 (defn _assoc-meta
-    "Given a dir-tree looks through the dir-tree for a file with :base-name == filename
-    and merges the given meta-struct with that file's :meta field. If the filename is .
+    "Given a dir-tree looks through the dir-tree for files where :base-name matches fileglob
+    and merges the given meta-struct with that file's :meta field. If the fileglob is .
     then apply the merge on the top level item (the directory struct). Does not go recursively
     down the tree."
-    [dir-tree filename meta-file-struct merge-fn merge-dir-fn]
-    (if (= "." filename)
-        (merge-dir-fn dir-tree meta-file-struct)
+    [dir-tree fileglob meta-file-struct merge-fn merge-dir-fn]
+    (if (= "." fileglob) (merge-dir-fn dir-tree meta-file-struct)
         (cons (first dir-tree)
-            (map #(if (basename-is? % filename) (merge-fn % meta-file-struct)
-                  (if (and (seq? %) 
-                           (basename-is? (first %) filename)) (merge-dir-fn % meta-file-struct)
-                   %))(rest dir-tree)))))
+            (map #(if (and (seq? %) (basename-matches? (first %) fileglob)) (merge-dir-fn % meta-file-struct)
+                  (if (basename-matches? % fileglob) (merge-fn % meta-file-struct)
+                   %)) (rest dir-tree)))))
 
 (defn assoc-meta         [d f m] (_assoc-meta d f m dfs-util/merge-meta 
                                                     dfs-util/merge-meta-dir))
@@ -168,8 +171,8 @@
     returning the filtered dir-tree and the contents of the _meta.json file, or the original dir-tree
     and '{}' if no _meta.json file was found"
     [dir-tree local-prefix]
-    (if-let [meta-file (some #(when (basename-is? % "_meta.json") %) dir-tree)]
-        [ (remove #(basename-is? % "_meta.json") dir-tree)
+    (if-let [meta-file (some #(when (basename-matches? % "_meta.json") %) dir-tree)]
+        [ (remove #(basename-matches? % "_meta.json") dir-tree)
           (slurp (str local-prefix (dutil/append-slash ((first dir-tree) :full-name)) (meta-file :full-name))) ]
         [ dir-tree "{}" ]))
 
@@ -177,9 +180,7 @@
     "A function to be passed into tree map which will find (and remove) all _meta.json files from the
     map, read them in, and apply the meta object inside of them to the appropriate file-structs"
     [dir-tree _ local-prefix]
-    (let [ pull-meta-ret (pull-meta-file dir-tree local-prefix)
-           new-dir-tree  (first  pull-meta-ret)
-           meta-string   (second pull-meta-ret) ]
+    (let [ [new-dir-tree meta-string] (pull-meta-file dir-tree local-prefix) ]
         (if-let [ meta-struct (dmeta/parse-meta-string meta-string) ]
             (reduce #(assoc-meta %1 (key %2) (val %2)) new-dir-tree meta-struct)
             (throw (Exception. (str "Could not parse _meta.json file in " 
