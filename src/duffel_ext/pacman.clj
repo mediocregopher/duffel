@@ -21,7 +21,7 @@
     (preprocess-file [x file-tree] file-tree)
     (preprocess-dir [x dir-tree] dir-tree)
     (file-meta-tpl [x]
-        { :extra-opts '(:list (:optional ())) })
+        { :extra-opts '( :list (:optional ()) (:map-tpl (:string)) ) })
     (dir-meta-tpl [x] {})
     (postprocess-file [x file-struct] file-struct)
     (postprocess-dir [x dir-struct] dir-struct)
@@ -29,7 +29,7 @@
     (process-file [x app meta-struct abs local]
         (let [all-pacs (s/split (slurp local) #"\n")
               pacs (remove package-installed? all-pacs)]
-            (when-not (empty? pacs) (install-packages! pacs))))
+            (when-not (empty? pacs) (apply install-packages! pacs (meta-struct :extra-opts)))))
 
 
     (process-dir [x app meta-struct abs local]
