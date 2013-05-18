@@ -82,6 +82,34 @@
     [dir]
     (.mkdirs (java.io.File. dir)))
 
+(defn- print-return-stream
+    [stream]
+    (let [stream-seq (->> stream
+                          (java.io.InputStreamReader.)
+                          (java.io.BufferedReader.)
+                          line-seq)]
+        (doall (reduce
+            (fn [acc line]
+                (println line)
+                (if (empty? acc) line (str acc "\n" line)))
+            ""
+            stream-seq))))
+
+(defn exec-stream
+    "Executes a command in the given dir, streaming stdout and stderr to stdout,
+    and once the exec is finished returns a vector of the return code, a string of
+    all the stdout output, and a string of all the stderr output"
+    [dir command & args]
+    (let [runtime  (Runtime/getRuntime)
+          proc     (.exec runtime (into-array (cons command args)) nil (File. dir))
+          stdout   (.getInputStream proc)
+          stderr   (.getErrorStream proc)
+          outfut   (future (print-return-stream stdout))
+          errfut   (future (print-return-stream stderr))
+          proc-ret (.waitFor proc)]
+        [proc-ret @outfut @errfut]
+        ))
+
 (defn exec-in
     "Executes a command in the given dir, throws an exception if the command doesn't return
     an exit code of 0"
