@@ -53,3 +53,4 @@ Here are a list of other extensions which have been written thus far:
 * [ignore](ignore.md)
 * [touch](touch.md)
 * [clerb](clerb.md)
+* [pacman](pacman.md)
