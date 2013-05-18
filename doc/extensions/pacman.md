@@ -9,7 +9,7 @@ versioning or updating the packages, and if there are any problems at all it wil
 
 Your `*._pacman` file will not actually be put in the filesystem. The file should contain a list of
 package names, with one package per line. That's it. Everytime duffel runs it will look through
-the list and remove all packages that are already installed, regardless of if they could be upgraded
+the list and remove all from the list packages that are already installed, regardless of if they could be upgraded
 or not. It then runs `sudo pacman -S --noconfirm --noprogressbar <extra opts> <packages>`. If there
 are any errors of any sort duffel will output them and stop execution.
 
