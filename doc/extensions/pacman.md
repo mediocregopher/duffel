@@ -36,12 +36,13 @@ Given the following directory structure:
 ```
 
 with `toinstall._pacman` containing:
-
 ```
 zsh
 openssh
 scrot
 feh
+
+#empty lines and lines starting with a hash will be ignored
 rsync
 vlc
 fortune

@@ -28,7 +28,10 @@
        
     (process-file [x app meta-struct abs local]
         (let [all-pacs (s/split (slurp local) #"\n")
-              pacs (remove package-installed? all-pacs)]
+              pacs (->> all-pacs
+                        (remove package-installed?)
+                        (remove empty?)
+                        (remove #(= (first %) \#)))]
             (when-not (empty? pacs) (apply install-packages! pacs (meta-struct :extra-opts)))))
 
 
