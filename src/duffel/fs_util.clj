@@ -160,11 +160,32 @@
     [file]
     (.exists (File. file)))
 
+(defn darwin? 
+  "Know if we are on a Mac, since certain unix tools are slightly different"
+  []
+  (= (trim (exec "uname")) "Darwin"))
+
+(defn find-default-group
+  "Chooses the default group as the group of the user's home,
+  or if all else fails uses the username"
+  [username]
+  (try 
+    (trim
+     (if (darwin?)
+       (exec "stat" "-f" "%Sg" (System/getenv "HOME"))
+       (exec "stat" "-c" "%G" (System/getenv "HOME"))))
+    (catch Exception e 
+      ;; Fuck it, let's just return the username and pretend this never happened...
+      username)))
+
 (defn permissions
     "Returns vector of file permissions, [full-octal owner group], where
     full-octal is the four number octal sequenct of the permissions (0755, 1655, etc...)"
     [file]
-    (let [perm-str (trim (exec "stat" "-c" "%a %U %G" file))
+    (let [perm-str (trim 
+                     (if (darwin?)
+                       (exec "stat" "-f" "%OLp %Su %Sg" file)
+                       (exec "stat" "-c" "%a %U %G" file)))
           [perm owner group] (split perm-str #" ")]
         [(dutil/full-octal perm) owner group]))
 

@@ -5,7 +5,7 @@
 
 (def current-username (java.lang.System/getProperty "user.name"))
 (def default-username current-username)
-(def default-group    default-username) ;Assume primary group = username, cause fuck it
+(def default-group    (dfs-util/find-default-group default-username)) ;Assume primary group = user's group, cause fuck it
 
 (def file-ownership-tpl 
     { :chmod (list :string (list :optional "0644") '(:regex #"^[0-7]{3,4}$"))
