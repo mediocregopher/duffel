@@ -141,6 +141,11 @@
     [src dst]
     (exec "cp" src dst))
 
+(defn lns
+    "Calls ln -s <src> <dst>"
+    [src dst]
+    (exec "ln" "-s" src dst))
+
 (defn ls
     "Returns a list of filenames in given directory"
     [dir]

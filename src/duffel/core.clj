@@ -9,6 +9,7 @@
               duffel-ext.git
               duffel-ext.ignore
               duffel-ext.touch
+              duffel-ext.lns
               duffel-ext.clerb
               duffel-ext.pacman))
 
