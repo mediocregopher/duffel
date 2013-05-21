@@ -4,6 +4,11 @@
               [duffel.ext      :as dext]
               [duffel.ext-util :as dext-util]))
 
+(defn ln-file [src dest meta]
+  (let [src (dfs-util/get-full-path src)]
+    (dext-util/print-fs-action "ln -s" src dest meta)
+    (dfs-util/lns src dest)))
+
 (deftype lns-ext [] duffel-extension
     (preprocess-file [x file-tree] file-tree)
     (preprocess-dir [x dir-tree] dir-tree)
@@ -20,13 +25,11 @@
 
     (process-file [x app meta-struct abs local]
         (when-not (dfs-util/exists? abs)
-            (dext-util/print-fs-action "ln -s" local abs meta-struct)
-            (dfs-util/lns local abs)))
+          (ln-file local abs meta-struct)))
 
     (process-dir [x app meta-struct abs local]
         (when-not (dfs-util/exists? abs)
-            (dext-util/print-fs-action "ln -s" local abs meta-struct)
-            (dfs-util/lns local abs)))
+          (ln-file local abs meta-struct)))
 )
 
 (dext/register-ext "lns" (->lns-ext))

@@ -194,6 +194,9 @@
           [perm owner group] (split perm-str #" ")]
         [(dutil/full-octal perm) owner group]))
 
+(defn get-full-path [path]
+  (.getAbsolutePath  (java.io.File. path)))
+
 (defn exact?
     "Returns true or false for if the two given files have the exact same contents"
     [file-a file-b]
