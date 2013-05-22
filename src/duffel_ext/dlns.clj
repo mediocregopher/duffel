@@ -1,4 +1,4 @@
-(ns duffel-ext.lns
+(ns duffel-ext.dlns
     (:use duffel.ext-protocol)
     (:require [duffel.fs-util  :as dfs-util]
               [duffel.ext      :as dext]
@@ -9,11 +9,11 @@
     (dext-util/print-fs-action "ln -s" src dest meta)
     (dfs-util/lns src dest)))
 
-(deftype lns-ext [] duffel-extension
+(deftype dlns-ext [] duffel-extension
     (preprocess-file [x file-tree] file-tree)
     (preprocess-dir [x dir-tree] dir-tree)
 
-    (file-meta-tpl [x] dext-util/file-ownership-tpl)
+    (file-meta-tpl [x] {})
     (dir-meta-tpl [x] {})
 
     (postprocess-file [x file-struct] file-struct)
@@ -32,4 +32,4 @@
           (ln-file local abs meta-struct)))
 )
 
-(dext/register-ext "lns" (->lns-ext))
+(dext/register-ext "dlns" (->dlns-ext))
