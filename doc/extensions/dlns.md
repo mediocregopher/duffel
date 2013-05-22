@@ -15,10 +15,10 @@ Given the following directory structure:
 ```
 /opt/my-duffel/
     tmp/
-        foo._lns
+        foo._dlns
 ```
 
-A symbolic link from `/tmp/foo` to `/opt/my-duffel/tmp/foo._lns` will be created.
+A symbolic link from `/tmp/foo` to `/opt/my-duffel/tmp/foo._dlns` will be created.
 
 The element being linked to can also be a directory.
 
