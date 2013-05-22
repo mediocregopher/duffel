@@ -22,19 +22,21 @@
 
 (defn run-on-dir
     [dir app]
-    (dutil/doall*
+    (try
+      (dutil/doall*
         (->> (dfs/specify-tree dir)
-             (dfs/translate-top-level)
-             (dfs/remove-special-dirs)
-             (dfs-util/chroot-tree (app :chroot))
-             (dfs-util/tree-map dfs/distribute-meta)
-             (dfs-util/tree-map dfs/filter-git)
-             (dext/pre-process)
-             (dext/process-templates)
-             (dext/post-template-process)
-             (dext/process app)
-             ))
-    nil)
+          (dfs/translate-top-level)
+          (dfs/remove-special-dirs)
+          (dfs-util/chroot-tree (app :chroot))
+          (dfs-util/tree-map dfs/distribute-meta)
+          (dfs-util/tree-map dfs/filter-git)
+          (dext/pre-process)
+          (dext/process-templates)
+          (dext/post-template-process)
+          (dext/process app)
+          ))
+      nil
+    (catch Exception e (.printStackTrace e) (System/exit 1))))
 
 
 (defn -main [& args]

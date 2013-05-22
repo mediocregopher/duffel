@@ -12,7 +12,7 @@ package names, with one package per line. That's it. Everytime duffel runs it wi
 the list and remove all from the list packages that are already installed, regardless of if they could be upgraded
 or not. It then runs:
 ```
-sudo pacman -S --noconfirm --noprogressbar <extra opts> <packages>
+sudo pacman -Sy --noconfirm --noprogressbar --needed <extra opts> <packages>
 ```
 
 If there
@@ -50,3 +50,14 @@ cowsay
 ```
 
 Duffel will install any of those packages which are not already installed.
+
+# yaourt extension
+
+Duffel can also interact with yaourt. instead of `*._pacman` use `*._yaourt`. The behavior remains
+exactly the same except that it uses yaourt instead of pacman so you can install packages straight out
+of the aur. If yaourt doesn't already exist on your system duffel will first install it through the
+archlinuxfr repo.
+
+*Note*: It's better to use the pacman extension where possible, as it has better error detection due
+to pacman never outputting to stderr unless necessary. With yaourt we only have the exit code to go
+on.
