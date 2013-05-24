@@ -77,7 +77,7 @@
 (defn merge-meta-dir         [d m] (_merge-meta-dir d m merge-meta))
 (defn merge-meta-dir-reverse [d m] (_merge-meta-dir d m merge-meta-reverse))
 
-(defn mkdir-p 
+(defn mkdir-p
     "Calls mkdir -p on the given directory"
     [dir]
     (.mkdirs (java.io.File. dir)))
@@ -126,7 +126,7 @@
     [command & args]
     (apply exec-in (concat ["." command] args)))
 
-(defn chmod 
+(defn chmod
     "Calls chmod on a file/directory"
     [perms fsitem]
     (exec "chmod" perms fsitem))

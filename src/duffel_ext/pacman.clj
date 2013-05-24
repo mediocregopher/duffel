@@ -32,7 +32,7 @@
 
 (defn- maybe-throw-exception
   [util ret-code ret-stdin ret-stderr]
-  (when-not (and (zero? ret-code) (empty? ret-stderr))
+  (when-not (zero? ret-code)
     (throw (Exception. (str "Error when running " util ": " ret-stderr)))))
 
 (deftype pacman-ext [] duffel-extension
@@ -42,7 +42,7 @@
     (dir-meta-tpl [x] {})
     (postprocess-file [x file-struct] file-struct)
     (postprocess-dir [x dir-struct] dir-struct)
-       
+
     (process-file [x app meta-struct abs local]
       (let [ret (gen-process-file "pacman" meta-struct local)]
         (apply maybe-throw-exception "pacman" ret)))

@@ -24,6 +24,7 @@
 (defn run-on-dir
     [dir app]
     (try
+      (println "starting duffel run")
       (dutil/doall*
         (->> (dfs/specify-tree dir)
           (dfs/translate-top-level)
@@ -36,6 +37,7 @@
           (dext/post-template-process)
           (dext/process app)
           ))
+      (println "duffel run complete!")
       nil
     (catch Exception e (.printStackTrace e) (System/exit 1))))
 
@@ -49,10 +51,12 @@
          [ backup-count "Number of backup files to keep" "3" ]
          remaining]
          (if-let [dir (first remaining)]
-            (run-on-dir dir { :chroot (parse-chroot chroot)
-                              :no-backup no-backup?
-                              :backup-dir backup-directory
-                              :backup-count (dutil/str->int backup-count) })
+            (do
+              (run-on-dir dir { :chroot (parse-chroot chroot)
+                                :no-backup no-backup?
+                                :backup-dir backup-directory
+                                :backup-count (dutil/str->int backup-count) })
+              (System/exit 0))
             (binding [*out* *err*]
                 (println "A duffel directory must be specified")
                 (System/exit 1)))))

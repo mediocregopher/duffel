@@ -57,7 +57,3 @@ Duffel can also interact with yaourt. instead of `*._pacman` use `*._yaourt`. Th
 exactly the same except that it uses yaourt instead of pacman so you can install packages straight out
 of the aur. If yaourt doesn't already exist on your system duffel will first install it through the
 archlinuxfr repo.
-
-*Note*: It's better to use the pacman extension where possible, as it has better error detection due
-to pacman never outputting to stderr unless necessary. With yaourt we only have the exit code to go
-on.
