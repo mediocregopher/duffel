@@ -20,7 +20,7 @@
                        (dfs-util/merge-meta-reverse % meta-struct)) dir-tree))
 
 (defmulti _preprocess-dir
-    (fn [dir-tree] 
+    (fn [dir-tree]
         (let [root-meta ((first dir-tree) :meta {})]
             (cond (root-meta :apply_recursively) :apply_recursively
                   (root-meta :apply_to_contents) :apply_to_contents
@@ -37,14 +37,14 @@
     (let [ dir-tree-root (first dir-tree)
            meta-struct   (clean-meta-struct (dir-tree-root :meta {})) ]
     (cons dir-tree-root
-        (rest (dfs-util/tree-map 
-                  (fn [d _ _] (meta->dir-tree d meta-struct)) 
+        (rest (dfs-util/tree-map
+                  (fn [d _ _] (meta->dir-tree d meta-struct))
                   dir-tree)))))
 
 (deftype put-ext [] duffel-extension
 
-    ;This one needed special attention, since a defmulti was the most efficient way to
-    ;implement it
+    ;This one needed special attention, since a defmulti was the most efficient
+    ;way to implement it
     (preprocess-dir [x dir-tree] (_preprocess-dir dir-tree))
 
     (file-meta-tpl [x] dext-util/file-ownership-tpl)
@@ -54,15 +54,19 @@
            { :delete_untracked  '(:bool (:optional false))
              :force_ownership   '(:bool (:optional false)) }))
 
-    ;These just return what they're given, no changed to the structs in these stages
+    ;These just return what they're given, no changed to the structs in these
+    ;stages
     (preprocess-file [x file-struct] file-struct)
     (postprocess-file [x file-struct] file-struct)
 
-    ;We go through after templating and attach a list of tracked items to each directory.
-    ;This is needed for :delete_untracked
+    ;We go through after templating and attach a list of tracked items to each
+    ;directory. This is needed for :delete_untracked
     (postprocess-dir [x dir-struct]
         (let [tracked (->> (rest dir-struct)
-                           (map #(if (seq? %) ((first %) :base-name) (% :base-name))))]
+                           (map
+                              #(if (seq? %)
+                                ((first %) :base-name)
+                                (% :base-name))))]
             (dfs-util/merge-meta-dir dir-struct {:tracked tracked})))
 
     (process-dir [x app meta-struct abs local]
@@ -74,7 +78,8 @@
         (when (meta-struct :delete_untracked)
             (let [ tracked-files   (meta-struct :tracked)
                    present-files   (set (dfs-util/ls abs))
-                   untracked       (apply disj (cons present-files tracked-files)) ]
+                   untracked       (apply disj
+                                      (cons present-files tracked-files)) ]
                 (doseq [filedir untracked]
                     (let [full-path (str abs "/" filedir)]
                         (println "rm" full-path)

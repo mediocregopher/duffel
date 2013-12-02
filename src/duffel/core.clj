@@ -41,10 +41,14 @@
       nil
     (catch Exception e (.printStackTrace e) (System/exit 1))))
 
+(def cli-help "A simple resource deployment tool. Check the docs at
+https://github.com/mediocregopher/duffel for more details\n\nUsage: duffel
+[OPTIONS] <duffel-directory>\n" )
+
 
 (defn -main [& args]
     (with-command-line args
-        "A simple resource deployment tool. Check the docs at https://github.com/mediocregopher/duffel for more details\n\nUsage: duffel [OPTIONS] <duffel-directory>\n"
+        cli-help
         [[ chroot "Directory to chroot to" "/" ]
          [ no-backup? n? "Set if you don't want to do any backing up of files" ]
          [ backup-directory b "Directory to backup files to" "/tmp/duffel_bak" ]

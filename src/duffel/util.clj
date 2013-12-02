@@ -16,14 +16,14 @@
                 (recur (first tail) (rest tail) (inc i))))))
 
 (defn thread-until [init & fns]
-    "Runs each fn on init until one of them doesn't return nil, and returns that result.
-    Returns nil if none of them return anything but nil"
+    "Runs each fn on init until one of them doesn't return nil, and returns that
+    result.  Returns nil if none of them return anything but nil"
     (loop [headfn (first fns)
            tailfn (rest fns)]
         (when headfn
             (let [ret (headfn init)]
-                (if (nil? ret) 
-                    (recur (first tailfn) (rest tailfn)) 
+                (if (nil? ret)
+                    (recur (first tailfn) (rest tailfn))
                     ret)))))
 
 (defn remove-trailing-slash
@@ -46,13 +46,14 @@
     (rest (re-find #"(.+?)([^\/]*)$" path)))
 
 (defn str->int
-    "Given a string, parses the first int out of it possible, or nil if none found"
+    "Given a string, parses the first int out of it possible, or nil if none
+    found"
     [s]
     (try (Integer/valueOf s) (catch Exception e nil)))
 
 (defn full-octal
-    "Given a string representing an octal (0644, 655, etc...), if the octal only has
-    three numbers instead of four, prepends a zero"
+    "Given a string representing an octal (0644, 655, etc...), if the octal only
+    has three numbers instead of four, prepends a zero"
     [octal-str]
     (if (not (= (count octal-str) 4))
         (str "0" octal-str)

@@ -14,8 +14,9 @@
 
 (defn- install-packages!
     [util pacs & opts]
-    (apply dfs-util/exec-stream "." "sudo" util "-Sy" "--noconfirm" "--noprogressbar"
-                                                      "--needed" (concat opts pacs)))
+    (apply dfs-util/exec-stream
+      "." "sudo" util
+      "-Sy" "--noconfirm" "--noprogressbar" "--needed" (concat opts pacs)))
 
 (def tpl { :extra-opts '( :list (:optional ()) (:map-tpl (:string)) ) })
 
@@ -48,13 +49,14 @@
         (apply maybe-throw-exception "pacman" ret)))
 
     (process-dir [x app meta-struct abs local]
-        (throw (Exception. "pacman extension doesn't support handling directories")))
+        (throw
+          (Exception. "pacman extension doesn't support handling directories")))
 )
 (dext/register-ext "pacman" (->pacman-ext))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Yaourt stuff
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn lines-search
     [lines regex]
@@ -71,9 +73,11 @@
         (let [cfglines (file-lines pacman-cfg)]
             (when-not (lines-search cfglines #"repo.archlinux.fr")
                 (println "adding archlinuxfr repo (needed to install yaourt)")
-                (spit pacman-cfg (str "\n[archlinuxfr]\n"
-                                      "SigLevel = Never\n"
-                                      "Server = http://repo.archlinux.fr/$arch\n") :append true)))
+                (spit pacman-cfg
+                  (str "\n[archlinuxfr]\n"
+                       "SigLevel = Never\n"
+                       "Server = http://repo.archlinux.fr/$arch\n")
+                  :append true)))
 
         (let [ret (install-packages! "pacman" ["yaourt"])]
           (apply maybe-throw-exception "pacman" ret))))
@@ -92,6 +96,7 @@
         (apply maybe-throw-exception "yaourt" ret)))
 
     (process-dir [x app meta-struct abs local]
-        (throw (Exception. "yaourt extension doesn't support handling directories")))
+        (throw
+          (Exception. "yaourt extension doesn't support handling directories")))
 )
 (dext/register-ext "yaourt" (->yaourt-ext))

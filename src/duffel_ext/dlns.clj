@@ -18,10 +18,9 @@
 
     (postprocess-file [x file-struct] file-struct)
 
-    (postprocess-dir [x dir-struct] 
+    (postprocess-dir [x dir-struct]
       ;; Once we ln -s a dir we don't want to do anything to it's children
       [(first dir-struct)])
-  
 
     (process-file [x app meta-struct abs local]
         (when-not (dfs-util/exists? abs)

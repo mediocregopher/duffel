@@ -19,7 +19,8 @@
     (postprocess-file [x file-struct] file-struct)
 
     (process-dir [x app meta-struct abs local]
-        (throw (Exception. "clerb extension doesn't support handling directories")))
+        (throw
+          (Exception. "clerb extension doesn't support handling directories")))
 
     (process-file [x app meta-struct abs local]
         (let [tpl-parsed (clerb-file local)]

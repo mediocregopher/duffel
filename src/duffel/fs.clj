@@ -11,18 +11,19 @@
 
 (defn _tree [fo]
     (let [fo-ls (.listFiles fo)]
-        (cons (.getName fo) (map #(if (.isDirectory %) (_tree %) (.getName %)) fo-ls))))
+        (cons (.getName fo)
+          (map #(if (.isDirectory %) (_tree %) (.getName %)) fo-ls))))
 
 (defn tree [dir]
-    (let [full-tree (_tree (File. dir))]
-	(cons (dutil/remove-trailing-slash dir) (rest full-tree))))
+  (let [full-tree (_tree (File. dir))]
+    (cons (dutil/remove-trailing-slash dir) (rest full-tree))))
 
 (def dot-underscore-split #"(.+)\._(.+)$")
 
 (defn host-specifier-split [file-name]
-    "Given a file name, returns a list where first item is
-    the base filename (possibly with duffel extension), and the
-    second is the host specifier (or '_default')"
+    "Given a file name, returns a list where first item is the base filename
+    (possibly with duffel extension), and the second is the host specifier (or
+    '_default')"
     (if-let [re-res (re-find dot-underscore-split file-name)]
         (if (dext/is-extension (last re-res))
             (list file-name "_default")
@@ -30,9 +31,9 @@
         (list file-name "_default")))
 
 (defn extension-split [file-name]
-    "Given a file name (assumes host specifier already split off)
-    returns a list where first item is the base filename and the
-    second is the extension to apply"
+    "Given a file name (assumes host specifier already split off) returns a list
+    where first item is the base filename and the second is the extension to
+    apply"
     (if-let [re-res (re-find dot-underscore-split file-name)]
         (if (dext/is-extension (last re-res))
             (rest re-res)
@@ -84,14 +85,14 @@
       :specifier specifier
       :extension extension
       :full-name dir-name
-      :dir-ls    dir-ls 
+      :dir-ls    dir-ls
       :is-dir?   true    }))
 
-(defn add-to-basename-group 
-    "Given a map and a file struct, creates a list with the file-struct
-    as the only item for the index of the map corresponding to the file-
-    struct's :base-name. If the list already exists in the given map,
-    append to it instead"
+(defn add-to-basename-group
+    "Given a map and a file struct, creates a list with the file-struct as the
+    only item for the index of the map corresponding to the file- struct's
+    :base-name. If the list already exists in the given map, append to it
+    instead"
     [file-map file-struct]
     (let [base-name (file-struct :base-name)
           base-name-seq (file-map base-name '())
@@ -108,27 +109,35 @@
 
 (declare specify-files)
 (defn directory-consolidate
-    "If file-struct has :dir-ls then it is a directory. Call specify-files
-    on the value at :dir-ls, then cons the file-struct (with :dir-ls dissociated)
+    "If file-struct has :dir-ls then it is a directory. Call specify-files on
+    the value at :dir-ls, then cons the file-struct (with :dir-ls dissociated)
     to the front."
     [proj-root file-struct]
     (if (contains? file-struct :dir-ls)
         (cons (dissoc file-struct :dir-ls) (specify-files proj-root (file-struct :dir-ls)))
         file-struct))
 
-(defn specify-files 
-    "Given a list of file names (presumably all in the same folder) goes and performs
-    all the steps needed to narrow down which files we want to actually use for this
-    particular node, and identifies which extension we want to process them with.
-    Returns a list of file-structs"
+(defn specify-files
+    "Given a list of file names (presumably all in the same folder) goes and
+    performs all the steps needed to narrow down which files we want to actually
+    use for this particular node, and identifies which extension we want to
+    process them with.  Returns a list of file-structs"
     [proj-root file-list]
     (->> file-list
-         (map explode-file)                                ; - Explode the files into their file-struct's
-         (remove #(empty? (% :base-name)))                 ; - Remove ones with empty base-names (shouldn't really happen)
-         (reduce add-to-basename-group {})                 ; - Reduce the structs by basename into a grouplist map
-         (map #(narrow-group proj-root (val %)))           ; - Take all the vals in the grouplist map and narrow them down to a single file-struct
-         (remove nil?)                                     ; - narrow-group returns nil if group can't be narrowed, remove those nils
-         (map (partial directory-consolidate proj-root)))) ; - Call specify files on the file list of all directory structs
+         ; - Explode the files into their file-struct's
+         (map explode-file)
+         ; - Remove ones with empty base-names (shouldn't really happen)
+         (remove #(empty? (% :base-name)))
+         ; - Reduce the structs by basename into a grouplist map
+         (reduce add-to-basename-group {})
+         ; - Take all the vals in the grouplist map and narrow them down to a
+         ;   single file-struct
+         (map #(narrow-group proj-root (val %)))
+         ; - narrow-group returns nil if group can't be narrowed, remove those
+         ;   nils
+         (remove nil?)
+         ; - Call specify files on the file list of all directory structs
+         (map (partial directory-consolidate proj-root))))
 
 (defn specify-tree
     "Since specify-files expects simply a list of files, not a '(dir & files)
@@ -149,10 +158,10 @@
     ))
 
 (defn _assoc-meta
-    "Given a dir-tree looks through the dir-tree for files where :base-name matches fileglob
-    and merges the given meta-struct with that file's :meta field. If the fileglob is .
-    then apply the merge on the top level item (the directory struct). Does not go recursively
-    down the tree."
+    "Given a dir-tree looks through the dir-tree for files where :base-name
+    matches fileglob and merges the given meta-struct with that file's :meta
+    field. If the fileglob is .  then apply the merge on the top level item (the
+    directory struct). Does not go recursively down the tree."
     [dir-tree fileglob meta-file-struct merge-fn merge-dir-fn]
     (if (= "." fileglob) (merge-dir-fn dir-tree meta-file-struct)
         (cons (first dir-tree)
@@ -160,30 +169,37 @@
                   (if (basename-matches? % fileglob) (merge-fn % meta-file-struct)
                    %)) (rest dir-tree)))))
 
-(defn assoc-meta         [d f m] (_assoc-meta d f m dfs-util/merge-meta 
-                                                    dfs-util/merge-meta-dir))
-(defn assoc-meta-reverse [d f m] (_assoc-meta d f m dfs-util/merge-meta-reverse 
-                                                    dfs-util/merge-meta-dir-reverse))
+(defn assoc-meta         [d f m] (_assoc-meta d f m
+                                    dfs-util/merge-meta
+                                    dfs-util/merge-meta-dir))
+(defn assoc-meta-reverse [d f m] (_assoc-meta d f m
+                                    dfs-util/merge-meta-reverse
+                                    dfs-util/merge-meta-dir-reverse))
 
 (defn pull-meta-file
-    "Given a dir-tree and the local prefix for the dir-tree, tries to find a _meta.json in the tree.
-    If found we remove the meta file-struct from the dir-tree and try to read the file from the disk,
-    returning the filtered dir-tree and the contents of the _meta.json file, or the original dir-tree
+    "Given a dir-tree and the local prefix for the dir-tree, tries to find a
+    _meta.json in the tree.  If found we remove the meta file-struct from the
+    dir-tree and try to read the file from the disk, returning the filtered
+    dir-tree and the contents of the _meta.json file, or the original dir-tree
     and '{}' if no _meta.json file was found"
     [dir-tree local-prefix]
     (if-let [meta-file (some #(when (basename-matches? % "_meta.json") %) dir-tree)]
         [ (remove #(basename-matches? % "_meta.json") dir-tree)
-          (slurp (str local-prefix (dutil/append-slash ((first dir-tree) :full-name)) (meta-file :full-name))) ]
+          (slurp (str
+            local-prefix
+            (dutil/append-slash ((first dir-tree) :full-name))
+            (meta-file :full-name))) ]
         [ dir-tree "{}" ]))
 
 (defn distribute-meta
-    "A function to be passed into tree map which will find (and remove) all _meta.json files from the
-    map, read them in, and apply the meta object inside of them to the appropriate file-structs"
+    "A function to be passed into tree map which will find (and remove) all
+    _meta.json files from the map, read them in, and apply the meta object
+    inside of them to the appropriate file-structs"
     [dir-tree _ local-prefix]
     (let [ [new-dir-tree meta-string] (pull-meta-file dir-tree local-prefix) ]
         (if-let [ meta-struct (dmeta/parse-meta-string meta-string) ]
             (reduce #(assoc-meta %1 (key %2) (val %2)) new-dir-tree meta-struct)
-            (throw (Exception. (str "Could not parse _meta.json file in " 
+            (throw (Exception. (str "Could not parse _meta.json file in "
                                     local-prefix ((first dir-tree) :full-name)
                                     ", it might not be valid json"))))))
 
@@ -191,22 +207,27 @@
     "Given a dir-tree, attempts to translate the root node's base-name"
     [dir-tree]
     (let [dir-struct (first dir-tree)
-          dir-struct-translated (assoc dir-struct :base-name
-                                    (dtran/translate-dir (dir-struct :base-name)))]
+          dir-struct-translated (assoc dir-struct
+                                  :base-name (dtran/translate-dir
+                                                (dir-struct :base-name)))]
         (cons dir-struct-translated (rest dir-tree))))
 
 (defn translate-top-level
-    "Given a dir-tree, goes through all top level directories and runs translate-dir-tree on
-    them"
+    "Given a dir-tree, goes through all top level directories and runs
+    translate-dir-tree on them"
     [dir-tree]
-    (cons (first dir-tree) (map #(if (seq? %) (translate-dir-tree %) %) (rest dir-tree))))
+    (cons (first dir-tree)
+      (map #(if (seq? %) (translate-dir-tree %) %) (rest dir-tree))))
 
 (defn remove-special-dirs
     [dir-tree]
     (cons (first dir-tree)
-          (remove #(and (seq? %) (dtran/is-special? ((first %) :base-name))) (rest dir-tree))))
+          (remove
+            #(and (seq? %) (dtran/is-special? ((first %) :base-name)))
+            (rest dir-tree))))
 
 (defn filter-git
-    "Function to be passed into tree-map which will remove all directories called .git"
+    "Function to be passed into tree-map which will remove all directories
+    called .git"
     [dir-tree _ _]
     (remove #(and (seq? %) (= ((first %) :base-name) ".git")) dir-tree))

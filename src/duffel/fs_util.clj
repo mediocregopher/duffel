@@ -5,9 +5,9 @@
 
 (defn chroot-tree
     [root dir-tree]
-    "Makes sure that the entire tree is chrooted to a directory. The given directory
-    should not end in a /. If you want to chroot to root itself (/) pass in a blank
-    string"
+    "Makes sure that the entire tree is chrooted to a directory. The given
+    directory should not end in a /. If you want to chroot to root itself (/)
+    pass in a blank string"
     (let [root-node  (first dir-tree)]
         (cons (assoc root-node :base-name root :is-root? true) (rest dir-tree))))
 
@@ -37,8 +37,10 @@
     (let [ new-dir-tree      (user-fn dir-tree abs local)
            new-dir-tree-node (first new-dir-tree)
            new-dir-base-name (new-dir-tree-node :base-name)
-           new-abs           (dutil/append-slash (str abs   (new-dir-tree-node :base-name)))
-           new-local         (dutil/append-slash (str local (new-dir-tree-node :full-name))) ]
+           new-abs           (dutil/append-slash
+                                (str abs(new-dir-tree-node :base-name)))
+           new-local         (dutil/append-slash
+                                (str local (new-dir-tree-node :full-name))) ]
         (map #(if (seq? %)
                   (_tree-map user-fn % new-abs new-local)
                   %)
@@ -64,13 +66,14 @@
     (assoc file-struct :meta (merge (file-struct :meta {}) meta-file-struct)))
 
 (defn merge-meta-reverse
-    "Same as merge-meta, but whatever's already in the file-struct takes precedence"
+    "Same as merge-meta, but whatever's already in the file-struct takes
+    precedence"
     [file-struct meta-file-struct]
     (assoc file-struct :meta (merge meta-file-struct (file-struct :meta {}))))
 
 (defn _merge-meta-dir
-    "Given a dir-tree and metadata, merges the dir-tree's root element's metadata
-    with the given metadata"
+    "Given a dir-tree and metadata, merges the dir-tree's root element's
+    metadata with the given metadata"
     [dir-tree meta-file-struct merge-fn]
     (cons (merge-fn (first dir-tree) meta-file-struct) (rest dir-tree)))
 
@@ -97,8 +100,8 @@
 
 (defn exec-stream
     "Executes a command in the given dir, streaming stdout and stderr to stdout,
-    and once the exec is finished returns a vector of the return code, a string of
-    all the stdout output, and a string of all the stderr output"
+    and once the exec is finished returns a vector of the return code, a string
+    of all the stdout output, and a string of all the stderr output"
     [dir command & args]
     (let [runtime  (Runtime/getRuntime)
           proc     (.exec runtime (into-array (cons command args)) nil (File. dir))
@@ -111,8 +114,8 @@
         ))
 
 (defn exec-in
-    "Executes a command in the given dir, throws an exception if the command doesn't return
-    an exit code of 0"
+    "Executes a command in the given dir, throws an exception if the command
+    doesn't return an exit code of 0"
     [dir command & args]
     (let [runtime  (Runtime/getRuntime)
           proc     (.exec runtime (into-array (cons command args)) nil (File. dir))
@@ -165,7 +168,7 @@
     [file]
     (.exists (File. file)))
 
-(defn darwin? 
+(defn darwin?
   "Know if we are on a Mac, since certain unix tools are slightly different"
   []
   (= (trim (exec "uname")) "Darwin"))
@@ -174,20 +177,21 @@
   "Chooses the default group as the group of the user's home,
   or if all else fails uses the username"
   [username]
-  (try 
+  (try
     (trim
      (if (darwin?)
        (exec "stat" "-f" "%Sg" (System/getenv "HOME"))
        (exec "stat" "-c" "%G" (System/getenv "HOME"))))
-    (catch Exception e 
+    (catch Exception e
       ;; Fuck it, let's just return the username and pretend this never happened...
       username)))
 
 (defn permissions
     "Returns vector of file permissions, [full-octal owner group], where
-    full-octal is the four number octal sequenct of the permissions (0755, 1655, etc...)"
+    full-octal is the four number octal sequenct of the permissions (0755, 1655,
+    etc...)"
     [file]
-    (let [perm-str (trim 
+    (let [perm-str (trim
                      (if (darwin?)
                        (exec "stat" "-f" "%OLp %Su %Sg" file)
                        (exec "stat" "-c" "%a %U %G" file)))
@@ -198,7 +202,8 @@
   (.getAbsolutePath  (java.io.File. path)))
 
 (defn exact?
-    "Returns true or false for if the two given files have the exact same contents"
+    "Returns true or false for if the two given files have the exact same
+    contents"
     [file-a file-b]
     (try (exec "cmp" file-a file-b) true
     (catch Exception e false)))

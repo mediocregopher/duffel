@@ -1,8 +1,8 @@
 (ns duffel.translation
     (:require [duffel.util :as dutil]))
 
-;This module contains functions related to top level directories in the project and
-;their names
+;This module contains functions related to top level directories in the project
+;and their names
 
 (defn translate-dir
     "Given a directory name (should be prefixed with a _), returns the
