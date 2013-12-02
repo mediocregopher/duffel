@@ -9,45 +9,6 @@
               [clojure.walk :refer [walk]])
     (:import java.io.File))
 
-(def my-fdqn (.getCanonicalHostName (java.net.InetAddress/getLocalHost)))
-(defn fdqn-matches [hostname]
-    (= my-fdqn hostname))
-
-(def my-hostname (.getHostName (java.net.InetAddress/getLocalHost)))
-(defn hostname-matches [hostname]
-    (= my-hostname hostname))
-
-(defn groupname-matches [proj-root groupname]
-    (dscript/is-in-group? proj-root groupname))
-
-(defn index-of-specified-entry [proj-root host-seq]
-    "Given a list of host specifiers, returns index of most specific one, or nil
-    if none match"
-    (dutil/thread-until host-seq
-        (partial dutil/index-when fdqn-matches)
-        (partial dutil/index-when hostname-matches)
-        (partial dutil/index-when #(groupname-matches proj-root %))
-        (partial dutil/index-when #(= "_default" %))))
-
-(defn add-to-basename-group
-    "Given a map and a file struct, creates a list with the file-struct as the
-    only item for the index of the map corresponding to the file- struct's
-    :base-name. If the list already exists in the given map, append to it
-    instead"
-    [file-map file-struct]
-    (let [base-name (file-struct :base-name)
-          base-name-seq (file-map base-name '())
-          new-seq (cons file-struct base-name-seq)]
-        (assoc file-map base-name new-seq)))
-
-(defn narrow-group
-    "Given a list of file-structs, returns the struct with the most specific
-    specifier"
-    [proj-root group-seq]
-    (let [specifiers (map #(% :specifier) group-seq)]
-        (when-let [i (index-of-specified-entry proj-root specifiers)]
-            (nth group-seq i))))
-
 (declare specify-files)
 (defn directory-consolidate
     "If file-struct has :dir-ls then it is a directory. Call specify-files on
