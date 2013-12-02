@@ -5,40 +5,9 @@
               [duffel.fs-util :as dfs-util]
               [duffel.translation :as dtran]
               [duffel.script  :as dscript]
-              [clojure.string :as s])
+              [clojure.string :as s]
+              [clojure.walk :refer [walk]])
     (:import java.io.File))
-
-
-(defn _tree [fo]
-    (let [fo-ls (.listFiles fo)]
-        (cons (.getName fo)
-          (map #(if (.isDirectory %) (_tree %) (.getName %)) fo-ls))))
-
-(defn tree [dir]
-  (let [full-tree (_tree (File. dir))]
-    (cons (dutil/remove-trailing-slash dir) (rest full-tree))))
-
-(def dot-underscore-split #"(.+)\._(.+)$")
-
-(defn host-specifier-split [file-name]
-    "Given a file name, returns a list where first item is the base filename
-    (possibly with duffel extension), and the second is the host specifier (or
-    '_default')"
-    (if-let [re-res (re-find dot-underscore-split file-name)]
-        (if (dext/is-extension (last re-res))
-            (list file-name "_default")
-            (rest re-res))
-        (list file-name "_default")))
-
-(defn extension-split [file-name]
-    "Given a file name (assumes host specifier already split off) returns a list
-    where first item is the base filename and the second is the extension to
-    apply"
-    (if-let [re-res (re-find dot-underscore-split file-name)]
-        (if (dext/is-extension (last re-res))
-            (rest re-res)
-            (list file-name "put"))
-        (list file-name "put")))
 
 (def my-fdqn (.getCanonicalHostName (java.net.InetAddress/getLocalHost)))
 (defn fdqn-matches [hostname]
@@ -59,34 +28,6 @@
         (partial dutil/index-when hostname-matches)
         (partial dutil/index-when #(groupname-matches proj-root %))
         (partial dutil/index-when #(= "_default" %))))
-
-(defmulti explode-file seq?)
-(defmethod explode-file false [file-name]
-    (let [spec-split-ret (host-specifier-split file-name)
-          specifier      (last spec-split-ret)
-          ext-split-ret  (extension-split (first spec-split-ret))
-          extension      (last  ext-split-ret)
-          base-name      (first ext-split-ret)]
-    { :base-name base-name
-      :specifier specifier
-      :extension extension
-      :full-name file-name
-      :is-dir?   false    }))
-
-(defmethod explode-file true [dir]
-    (let [dir-name       (first dir)
-          dir-ls         (rest  dir)
-          spec-split-ret (host-specifier-split dir-name)
-          specifier      (last spec-split-ret)
-          ext-split-ret  (extension-split (first spec-split-ret))
-          extension      (last  ext-split-ret)
-          base-name      (first ext-split-ret)]
-    { :base-name base-name
-      :specifier specifier
-      :extension extension
-      :full-name dir-name
-      :dir-ls    dir-ls
-      :is-dir?   true    }))
 
 (defn add-to-basename-group
     "Given a map and a file struct, creates a list with the file-struct as the
