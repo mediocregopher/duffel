@@ -98,6 +98,15 @@
           #(if (sequential? %) (tree-file-map f %) (f dir-map %))
           file-maps)))))
 
+(defn tree-map
+  "Given a duffel tree, run f on that duffel tree. Look through the returned
+  duffel tree for more duffel trees, and call f on them. Recurse."
+  [f dtree]
+  (let [new-dtree (f dtree)]
+    (cons
+      (first new-dtree)
+      (map #(if (sequential? %) (tree-map f %) %) (rest new-dtree)))))
+
 (defn dir-get
   "Get a key from the dir map at the root of the given tree"
   [dtree k]
