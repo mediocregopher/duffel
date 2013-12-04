@@ -2,7 +2,7 @@
   "specify provides functions for going through a duffel tree and narrowing down
   files with the same name but different hostname/groupname specifiers so we're
   only left with the correct ones"
-  (:require [duffel.tree.core :refer [tree-map]]
+  (:require [duffel.tree.core :refer [tree-map tree-get]]
             [duffel.script    :refer [is-in-group?]]))
 
 (def my-fdqn (.getCanonicalHostName (java.net.InetAddress/getLocalHost)))
@@ -37,10 +37,10 @@
     items))
 
 (defn- df-rname [df]
-  (if (sequential? df) (:real-name (first df)) (:real-name df)))
+  (tree-get df :real-name))
 
 (defn- df-spec [df]
-  (if (sequential? df) (:specifier (first df)) (:specifier df)))
+  (tree-get df :specifier))
 
 (defn specified-entry
   "Given a sequence containing dir-maps or file-maps, returns the most specific

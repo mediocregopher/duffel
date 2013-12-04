@@ -107,17 +107,19 @@
       (first new-dtree)
       (map #(if (sequential? %) (tree-map f %) %) (rest new-dtree)))))
 
-(defn dir-get
-  "Get a key from the dir map at the root of the given tree"
-  [dtree k]
-  (k (first dtree)))
+(defn tree-get
+  "Given some item from a duffel tree, either a file or another tree, returns
+  the value of a key in it"
+  [el k]
+  (if (sequential? el) ((first el) k) (el k)))
 
-(defn dir-assoc
-  "Does an assoc on the dir map at the root of the given tree"
-  [dtree & kvs]
-  (cons
-    (apply assoc (first dtree) kvs)
-    (rest dtree)))
+(defn tree-assoc
+  "Given some item from a duffel tree, either a file or another tree, associates
+  the given key/value pairs in its map"
+  [el & kvs]
+    (if (sequential? el)
+      (cons (apply assoc (first el) kvs) (rest el))
+      (apply assoc el kvs)))
 
 (defn file-map
   "Calls f on each file (skipping child directories) in the root directory of

@@ -3,7 +3,7 @@
   them of unecessary dirs/files/information"
   (:require [duffel.tree.core :refer [tree-dir-mapreduce
                                       tree-file-map
-                                      dir-assoc]]))
+                                      tree-assoc]]))
 
 (defn- try-append-slash
   "Given a string representing a directory, appends a slash to the string if
@@ -33,7 +33,7 @@
   abs-path is the given chroot, and all children follow from that"
   [dtree root]
   (let [real-root (try-append-slash root)
-        rooted-dtree (dir-assoc dtree :abs-path real-root)]
+        rooted-dtree (tree-assoc dtree :abs-path real-root)]
     (->> rooted-dtree
       (tree-dir-mapreduce
         (fn [dir-map acc _]
