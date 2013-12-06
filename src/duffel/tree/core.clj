@@ -64,39 +64,6 @@
   [dir]
   (-> dir create-dir-tree explode-tree))
 
-(defn tree-dir-mapreduce
-  "Given a duffel tree, runs f on each dir map (the first item in each list).
-  The first argument to f is the dir map itself. The second is an accumulator.
-  The third is the list of file maps for that dir map. f returns a vector of the
-  new dir map and new accumulator which will be given to all child calls from
-  that dir. If the new dir map is nil then that dir is removed and its children
-  are not processed. The file map list is unaffected"
-  [f acc dtree]
-  (let [dir-map (first dtree)
-        file-maps (rest dtree)
-        [new-dir-map new-acc] (f dir-map acc file-maps)]
-    (when-not (nil? new-dir-map)
-      (cons new-dir-map
-        (remove nil?
-          (map
-            #(if (sequential? %) (tree-dir-mapreduce f new-acc %) %)
-            file-maps))))))
-
-(defn tree-file-map
-  "Given a duffel tree, runs f on each file map (any map that's not the first
-  item in a list). The first argument to f is the dir map for the file, the
-  second is the file map currently being looked at. f returns the new file map
-  to be put in place. If f returns nil then the file map will be ommitted from
-  the returned tree"
-  [f dtree]
-  (let [dir-map (first dtree)
-        file-maps (rest dtree)]
-    (cons dir-map
-      (remove nil?
-        (map
-          #(if (sequential? %) (tree-file-map f %) (f dir-map %))
-          file-maps)))))
-
 (defn tree-map
   "Given a duffel tree, run f on that duffel tree. Look through the returned
   duffel tree for more duffel trees, and call f on them. Recurse."
@@ -113,7 +80,6 @@
   (cons (first dtree)
     (map f (rest dtree))))
 
-
 (defn tree-get
   "Given some item from a duffel tree, either a file or another tree, returns
   the value of a key in it"
@@ -128,24 +94,3 @@
   (if (sequential? el)
     (cons (apply assoc (first el) kvs) (rest el))
     (apply assoc el kvs)))
-
-(comment
-  (require '[clojure.pprint :refer [pprint]])
-
-  (pprint
-    (tree-dir-mapreduce
-      (fn [dir acc files]
-        (if (= (dir :real-name) "wat1") [nil acc]
-          [(assoc dir :len-files (count files) :path acc)
-           (str acc "/" (dir :real-name))]))
-      ""
-      (dir->tree "my-duffel")))
-
-  (pprint
-    (tree-file-map
-      (fn [dir file]
-        (when-not (= (file :real-name) "b.txt")
-          (assoc file :dir-name (dir :real-name))))
-      (dir->tree "my-duffel")))
-
-)
