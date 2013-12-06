@@ -1,7 +1,8 @@
 (ns duffel.tree.meta
   "meta provides functions for reading and folding in metadata files in the
   duffel tree"
-  (:require [duffel.tree.core :refer [tree-map tree-get tree-assoc]]
+  (:require [duffel.tree.core :refer [tree-map tree-get tree-assoc
+                                      tree-contents-map]]
             [cheshire.core :refer [parse-string]]
             [clojure.string :as s]))
 
@@ -79,13 +80,32 @@
             (read-meta-file meta-file)))))
     dtree))
 
+(defn cascade-meta
+  "Given a duffel tree, goes through and finds all instances of
+  \"apply_shallow\" or \"apply_deep\" and appropriately cascades them down the
+  tree"
+  [dtree]
+  (tree-map
+    (fn [dt]
+      (let [root-meta (tree-get dt :meta {})
+            clean-root-meta (dissoc root-meta "apply_shallow")]
+        (if (or (root-meta "apply_shallow") (root-meta "apply_deep"))
+          (tree-contents-map
+            #(let [curr-meta (tree-get % :meta {})
+                   new-meta  (merge clean-root-meta curr-meta)]
+              (tree-assoc % :meta new-meta))
+            dt)
+          dt)))
+    dtree))
+
 (comment
   (require '[duffel.tree.core :refer :all])
   (require '[duffel.tree.paths :refer :all])
   (require '[clojure.pprint :refer [pprint]])
 
   (pprint
-    (collapse-meta
-      (fill-relpaths (dir->tree "my-duffel"))))
+    (cascade-meta
+      (collapse-meta
+        (fill-relpaths (dir->tree "my-duffel")))))
 
 )

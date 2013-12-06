@@ -107,25 +107,28 @@
       (first new-dtree)
       (map #(if (sequential? %) (tree-map f %) %) (rest new-dtree)))))
 
+(defn tree-contents-map
+  "Same as tree-map, but doesn't descend down into sub-directories and only runs
+  over the contents of the given duffel tree, not the head itself"
+  [f dtree]
+  (cons (first dtree)
+    (map f (rest dtree))))
+
+
 (defn tree-get
   "Given some item from a duffel tree, either a file or another tree, returns
   the value of a key in it"
-  [el k]
-  (if (sequential? el) ((first el) k) (el k)))
+  [el k & default]
+  (let [d (first default)]
+    (if (sequential? el) ((first el) k d) (el k d))))
 
 (defn tree-assoc
   "Given some item from a duffel tree, either a file or another tree, associates
   the given key/value pairs in its map"
   [el & kvs]
-    (if (sequential? el)
-      (cons (apply assoc (first el) kvs) (rest el))
-      (apply assoc el kvs)))
-
-(defn file-map
-  "Calls f on each file (skipping child directories) in the root directory of
-  the given tree. Returns sequence of returned values"
-  [f dtree]
-  (map f (remove sequential? (rest dtree))))
+  (if (sequential? el)
+    (cons (apply assoc (first el) kvs) (rest el))
+    (apply assoc el kvs)))
 
 (comment
   (require '[clojure.pprint :refer [pprint]])
@@ -146,7 +149,4 @@
           (assoc file :dir-name (dir :real-name))))
       (dir->tree "my-duffel")))
 
-  (dir-get (dir->tree "my-duffel") :real-name)
-
-  (dir-assoc (dir->tree "my-duffel") :a "a" :b "b")
 )
