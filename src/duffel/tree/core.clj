@@ -1,6 +1,5 @@
 (ns duffel.tree.core
   "Core functionality for creating and working with duffel trees"
-  (:require [clojure.walk :refer [walk]])
   (:import java.io.File))
 
 (def dot-underscore-split #"(.+)\._(.+)$")
