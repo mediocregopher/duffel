@@ -1,6 +1,5 @@
 (ns duffel.fs
     (:use [clojure.string :only [split trim]])
-    (:require [duffel.util :as dutil])
     (:import java.io.File))
 
 (defn mkdir-p
@@ -109,6 +108,14 @@
       ;; Fuck it, let's just return the username and pretend this never happened...
       username)))
 
+(defn full-octal
+  "Given a string representing an octal (0644, 655, etc...), if the octal only
+  has three numbers instead of four, prepends a zero"
+  [octal-str]
+  (if (not (= (count octal-str) 4))
+      (str "0" octal-str)
+      octal-str))
+
 (defn permissions
     "Returns vector of file permissions, [owner group full-octal], where
     full-octal is the four number octal sequenct of the permissions (0755, 1655,
@@ -119,7 +126,7 @@
                        (exec "stat" "-f" "%OLp %Su %Sg" file)
                        (exec "stat" "-c" "%a %U %G" file)))
           [perm owner group] (split perm-str #" ")]
-        [owner group (dutil/full-octal perm)]))
+        [owner group (full-octal perm)]))
 
 (defn get-full-path [path]
   (.getAbsolutePath  (java.io.File. path)))

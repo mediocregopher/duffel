@@ -2,7 +2,6 @@
     (:gen-class :main true)
     (:use clojure.contrib.command-line)
     (:require [duffel.fs      :as dfs]
-              [duffel.util    :as dutil]
               [duffel.ext     :as dext]
               [duffel.fs-util :as dfs-util]
               duffel-ext.put
@@ -12,6 +11,16 @@
               duffel-ext.dlns
               duffel-ext.clerb
               duffel-ext.pacman))
+
+(defn doall*
+    "Same as doall, but recursive"
+    [s] (dorun (tree-seq seq? seq s)) s)
+
+(defn str->int
+    "Given a string, parses the first int out of it possible, or nil if none
+    found"
+    [s]
+    (try (Integer/valueOf s) (catch Exception e nil)))
 
 (defn parse-chroot
     "Make sure that chroot is properly formed"
@@ -25,7 +34,7 @@
     [dir app]
     (try
       (println "starting duffel run")
-      (dutil/doall*
+      (doall*
         (->> (dfs/specify-tree dir)
           (dfs/translate-top-level)
           (dfs/remove-special-dirs)

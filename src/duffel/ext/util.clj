@@ -1,6 +1,5 @@
 (ns duffel.ext.util
     (:require [duffel.fs      :as dfs]
-              [duffel.util    :as dutil]
               [duffel.tree.core :refer [tree-get-in]]))
 
 (def current-username (java.lang.System/getProperty "user.name"))
@@ -45,7 +44,7 @@
   to it, and returns true/false if the existing permissions are different"
   [abs owner group chmod]
   (and (dfs/exists? abs)
-       (= [owner group (dutil/full-octal chmod)] (dfs/permissions abs))))
+       (= [owner group (dfs/full-octal chmod)] (dfs/permissions abs))))
 
 (defn files-same?
   "Looks at a local file and its potential permissions and one on the
