@@ -1,5 +1,5 @@
 (ns duffel.ext.impl.ignore
-    (:require [duffel.ext.core :refer [duffel-extension]]))
+  (:require [duffel.ext.core :refer [duffel-extension add-impl]]))
 
 (deftype ignore-ext [] duffel-extension
 
@@ -8,3 +8,5 @@
 
     (process-file [x app file-map] nil)
 )
+
+(add-impl "ignore" (->ignore-ext))

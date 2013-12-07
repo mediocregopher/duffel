@@ -1,5 +1,5 @@
 (ns duffel.ext.impl.pacman
-  (:require [duffel.ext.core :refer [duffel-extension]]
+  (:require [duffel.ext.core :refer [duffel-extension add-impl]]
             [duffel.ext.util :refer :all]
             [clojure.string  :refer [split]]
             [duffel.fs       :refer [exec exec-stream]]))
@@ -46,6 +46,8 @@
       (apply maybe-throw-exception "pacman" ret)))
 )
 
+(add-impl "pacman" (->pacman-ext))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Yaourt stuff
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -86,3 +88,5 @@
           ret (apply gen-process-file "yaourt" (file-map :rel-path) opts)]
       (apply maybe-throw-exception "yaourt" ret)))
 )
+
+(add-impl "yaourt" (->yaourt-ext))

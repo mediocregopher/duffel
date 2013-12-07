@@ -1,7 +1,7 @@
 (ns duffel.ext.impl.touch
-  (:require [duffel.ext.core  :refer [duffel-extension]]
-            [duffel.ext.util  :refer :all]
-            [duffel.fs        :refer [touch]]))
+  (:require [duffel.ext.core :refer [duffel-extension add-impl]]
+            [duffel.ext.util :refer :all]
+            [duffel.fs       :refer [touch]]))
 
 (deftype touch-ext [] duffel-extension
 
@@ -18,3 +18,5 @@
         (touch abs)
         (force-perms abs owner group chmod)))
 )
+
+(add-impl "touch" (->touch-ext))

@@ -10,3 +10,14 @@
 
     (process-file [x app file-map]
         "called on a file-map with this extension"))
+
+(def impls (atom {}))
+(defn add-impl
+  "Adds an implementation of duffel-extension to the list of available ones"
+  [name impl]
+  (swap! impls assoc name impl))
+
+(defn get-impl
+  "Retrieves an implementation of the given duffel-extension"
+  [name]
+  (@impls name))

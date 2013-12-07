@@ -1,5 +1,5 @@
 (ns duffel.ext.impl.put
-  (:require [duffel.ext.core  :refer [duffel-extension]]
+  (:require [duffel.ext.core :refer [duffel-extension add-impl]]
             [duffel.ext.util  :refer :all]
             [duffel.tree.core :refer [tree-contents-map]]
             [duffel.fs        :refer [exists? mkdir-p ls rm-rf cp]]))
@@ -24,7 +24,8 @@
             (let [full-path (str abs filedir)]
               (println "rm" full-path)
               (try-backup full-path)
-              (rm-rf full-path)))))))
+              (rm-rf full-path))))))
+    dtree)
 
   (process-file [x app file-map]
     (let [local (meta-get file-map :rel-path)
@@ -37,3 +38,5 @@
           (force-perms abs owner group chmod))))
 
 )
+
+(add-impl "put" (->put-ext))

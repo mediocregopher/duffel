@@ -1,8 +1,8 @@
 (ns duffel.ext.impl.clerb
-    (:use clerb.core)
-    (:require [duffel.ext.core :refer [duffel-extension]]
-              [duffel.ext.util :refer :all]
-              [duffel.fs       :refer [exists?]]))
+  (:use clerb.core)
+  (:require [duffel.ext.core :refer [duffel-extension add-impl]]
+            [duffel.ext.util :refer :all]
+            [duffel.fs       :refer [exists?]]))
 
 (deftype clerb-ext [] duffel-extension
 
@@ -15,7 +15,7 @@
           abs   (file-map :abs-path)
           [owner group chmod] (file-filled-perms file-map)
           tpl-parsed (clerb-file local)]
-      (when-not (and (dfs/exists? abs)
+      (when-not (and (exists? abs)
                      (= tpl-parsed (slurp abs))
                      (perm-same? abs owner group chmod))
         (try-backup app abs)
@@ -23,3 +23,5 @@
         (spit abs (clerb-file local))
         (force-perms abs owner group chmod))))
 )
+
+(add-impl "clerb" (->clerb-ext))
