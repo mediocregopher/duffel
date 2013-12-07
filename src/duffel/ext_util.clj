@@ -1,24 +1,29 @@
 (ns duffel.ext-util
     (:require [duffel.fs-util :as dfs-util]
               [duffel.backup  :as dbackup]
-              [duffel.util    :as dutil]))
+              [duffel.util    :as dutil]
+              [duffel.tree.core :refer [tree-get-in]]))
 
 (def current-username (java.lang.System/getProperty "user.name"))
 (def default-username current-username)
 ;Assume primary group = user's group, cause fuck it
 (def default-group    (dfs-util/find-default-group default-username))
 
-(def file-ownership-tpl
-    { :chmod (list :string (list :optional "0644") '(:regex #"^[0-7]{3,4}$"))
-      :owner (list :string (list :optional default-username)                )
-      :group (list :string (list :optional default-group)                   ) })
+(defn file-filled-perms
+  "Given a file-map, returns the chmod, owner, and group specified by its
+  metadata, or the defaults there-of if they're not given"
+  [file-map]
+  [ (tree-get-in file-map [:meta "chmod"] "0644")
+    (tree-get-in file-map [:meta "owner"] default-username)
+    (tree-get-in file-map [:meta "group"] default-group) ])
 
-(def dir-ownership-tpl
-    (merge file-ownership-tpl
-        { :chmod (list
-                    :string
-                    (list :optional "0755")
-                    '(:regex #"^[0-7]{3,4}$")) }))
+(defn dir-filled-perms
+  "Given a dtree, returns the chmod, owner, and group specified by its metadata,
+  or the defaults there-of if they're not given"
+  [dtree]
+  [ (tree-get-in file-map [:meta "chmod"] "0755")
+    (tree-get-in file-map [:meta "owner"] default-username)
+    (tree-get-in file-map [:meta "group"] default-group) ])
 
 (defn force-ownership
     [abs meta-struct]

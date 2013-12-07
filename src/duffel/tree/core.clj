@@ -80,12 +80,19 @@
   (cons (first dtree)
     (map f (rest dtree))))
 
+(defn tree-get-in
+  "Given some item from a duffel tree, either a file or another tree, returns
+  the value at some embedded key in it, where that key is found by following the
+  keys in the given list"
+  [el ks & default]
+    (let [d (first default)]
+      (if (sequential? el) (get-in (first el) ks d) (get-in el ks d))))
+
 (defn tree-get
   "Given some item from a duffel tree, either a file or another tree, returns
   the value of a key in it"
   [el k & default]
-  (let [d (first default)]
-    (if (sequential? el) ((first el) k d) (el k d))))
+  (apply tree-get-in el [k] default))
 
 (defn tree-assoc
   "Given some item from a duffel tree, either a file or another tree, associates
