@@ -1,4 +1,4 @@
-(ns duffel-ext.clerb
+(ns duffel.ext.impl.clerb
     (:use duffel.ext-protocol)
     (:use clerb.core)
     (:require [duffel.fs-util  :as dfs-util]

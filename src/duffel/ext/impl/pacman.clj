@@ -1,4 +1,4 @@
-(ns duffel-ext.pacman
+(ns duffel.ext.impl.pacman
     (:use duffel.ext-protocol)
     (:require [clojure.string :as s]
               [duffel.ext     :as dext]

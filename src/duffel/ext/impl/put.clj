@@ -1,4 +1,4 @@
-(ns duffel-ext.put
+(ns duffel.ext.impl.put
     (:use duffel.ext-protocol)
     (:require [duffel.fs-util  :as dfs-util]
               [duffel.util     :as dutil]

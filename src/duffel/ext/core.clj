@@ -1,4 +1,4 @@
-(ns duffel.ext-protocol)
+(ns duffel.ext.core)
 
 (defprotocol duffel-extension
     "Protocol which defines an extension which can be used by duffel"

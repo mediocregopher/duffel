@@ -1,4 +1,4 @@
-(ns duffel-ext.ignore
+(ns duffel.ext.impl.ignore
     (:use duffel.ext-protocol)
     (:require [duffel.ext     :as dext]))
 

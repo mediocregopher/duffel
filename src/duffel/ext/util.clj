@@ -1,4 +1,4 @@
-(ns duffel.ext-util
+(ns duffel.ext.util
     (:require [duffel.fs-util :as dfs-util]
               [duffel.backup  :as dbackup]
               [duffel.util    :as dutil]
@@ -21,9 +21,9 @@
   "Given a dtree, returns the chmod, owner, and group specified by its metadata,
   or the defaults there-of if they're not given"
   [dtree]
-  [ (tree-get-in file-map [:meta "chmod"] "0755")
-    (tree-get-in file-map [:meta "owner"] default-username)
-    (tree-get-in file-map [:meta "group"] default-group) ])
+  [ (tree-get-in dtree [:meta "chmod"] "0755")
+    (tree-get-in dtree [:meta "owner"] default-username)
+    (tree-get-in dtree [:meta "group"] default-group) ])
 
 (defn force-ownership
     [abs meta-struct]

@@ -1,4 +1,4 @@
-(ns duffel-ext.dlns
+(ns duffel.ext.impl.dlns
     (:use duffel.ext-protocol)
     (:require [duffel.fs-util  :as dfs-util]
               [duffel.ext      :as dext]

@@ -1,4 +1,4 @@
-(ns duffel-ext.touch
+(ns duffel.ext.impl.touch
     (:use duffel.ext-protocol)
     (:require [duffel.fs-util  :as dfs-util]
               [duffel.ext      :as dext]
