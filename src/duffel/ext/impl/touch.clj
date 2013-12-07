@@ -1,29 +1,20 @@
 (ns duffel.ext.impl.touch
-    (:use duffel.ext-protocol)
-    (:require [duffel.fs-util  :as dfs-util]
-              [duffel.ext      :as dext]
-              [duffel.ext-util :as dext-util]))
+  (:require [duffel.ext.core  :refer [duffel-extension]]
+            [duffel.ext.util  :refer :all]
+            [duffel.fs        :refer [touch]]))
 
 (deftype touch-ext [] duffel-extension
-    (preprocess-file [x file-tree] file-tree)
-    (preprocess-dir [x dir-tree] dir-tree)
 
-    (file-meta-tpl [x] dext-util/file-ownership-tpl)
-    (dir-meta-tpl [x] {})
+  (process-dir [x app dtree]
+    (throw
+      (Exception. "touch extension doesn't support handling directories")))
 
-    (postprocess-file [x file-struct] file-struct)
-    (postprocess-dir [x dir-struct] dir-struct)
-
-    (process-file [x app meta-struct abs local]
-        (when-not (and (dfs-util/exists? abs)
-                       (dext-util/perm-same? abs meta-struct))
-            (dext-util/print-fs-action "touch" local abs meta-struct)
-            (dfs-util/touch abs)
-            (dext-util/try-ownership abs meta-struct)))
-
-    (process-dir [x app meta-struct abs local]
-        (throw
-          (Exception. "touch extension doesn't support handling directories")))
+  (process-file [x app file-map]
+    (let [local (meta-get file-map :rel-path)
+          abs   (meta-get file-map :abs-path)
+          [owner group chmod] (file-filled-perms file-map)]
+      (when-not (perm-same? abs owner group chmod))
+        (print-fs-action "touch" local abs owner group chmod)
+        (touch abs)
+        (force-perms abs owner group chmod)))
 )
-
-(dext/register-ext "touch" (->touch-ext))

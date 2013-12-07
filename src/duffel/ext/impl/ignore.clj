@@ -1,20 +1,10 @@
 (ns duffel.ext.impl.ignore
-    (:use duffel.ext-protocol)
-    (:require [duffel.ext     :as dext]))
+    (:require [duffel.ext.core :refer [duffel-extension]]))
 
 (deftype ignore-ext [] duffel-extension
 
-    (preprocess-file [x file-tree] file-tree)
-    (preprocess-dir [x dir-tree]
-        ;We want to ignore anything that's inside an ignore'd directory,
-        ;so we only keep the head of the tree
-        (list (first dir-tree)))
-    (file-meta-tpl [x] {})
-    (dir-meta-tpl [x] {})
-    (postprocess-file [x file-struct] file-struct)
-    (postprocess-dir [x dir-struct] dir-struct)
-    (process-file [x app meta-struct abs local] nil)
-    (process-dir [x app meta-struct abs local] nil)
-)
+    ; We don't want to process anything inside an ignored directory
+    (process-dir [x app dtree] (list (first dtree)))
 
-(dext/register-ext "ignore" (->ignore-ext))
+    (process-file [x app file-map] nil)
+)

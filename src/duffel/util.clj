@@ -4,25 +4,6 @@
     "Same as doall, but recursive"
     [s] (dorun (tree-seq seq? seq s)) s)
 
-(defn remove-trailing-slash
-    "Given a string, if it ends in a slash, removes it"
-    [dir-name]
-    (if (= \/ (last dir-name))
-        (apply str (butlast dir-name))
-        dir-name))
-
-(defn remove-preceding-slash
-    "Given a string, if it begins with a slash, removes it"
-    [dir-name]
-    (if (= \/ (first dir-name))
-        (apply str (rest dir-name))
-        dir-name))
-
-(defn append-slash [dir-name] (str dir-name "/"))
-
-(defn path-split [path]
-    (rest (re-find #"(.+?)([^\/]*)$" path)))
-
 (defn str->int
     "Given a string, parses the first int out of it possible, or nil if none
     found"

@@ -110,7 +110,7 @@
       username)))
 
 (defn permissions
-    "Returns vector of file permissions, [full-octal owner group], where
+    "Returns vector of file permissions, [owner group full-octal], where
     full-octal is the four number octal sequenct of the permissions (0755, 1655,
     etc...)"
     [file]
@@ -119,7 +119,7 @@
                        (exec "stat" "-f" "%OLp %Su %Sg" file)
                        (exec "stat" "-c" "%a %U %G" file)))
           [perm owner group] (split perm-str #" ")]
-        [(dutil/full-octal perm) owner group]))
+        [owner group (dutil/full-octal perm)]))
 
 (defn get-full-path [path]
   (.getAbsolutePath  (java.io.File. path)))

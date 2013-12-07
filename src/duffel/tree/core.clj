@@ -51,19 +51,6 @@
       (map #(if (.isDirectory %)
         (create-dir-tree %) (.getName %)) fo-ls))))
 
-(defn explode-tree
-  "Given a flat tree, explodes all elements of it"
-  [tree]
-  (walk
-    #(if (seq? %) (explode-tree %) (explode-file %))
-    identity
-    tree))
-
-(defn dir->tree
-  "Given a directory name, turns it into a duffel tree"
-  [dir]
-  (-> dir create-dir-tree explode-tree))
-
 (defn tree-map
   "Given a duffel tree, run f on that duffel tree. Look through the returned
   duffel tree for more duffel trees, and call f on them. Recurse."
@@ -101,3 +88,16 @@
   (if (sequential? el)
     (cons (apply assoc (first el) kvs) (rest el))
     (apply assoc el kvs)))
+
+(defn explode-tree
+  "Given a flat tree, explodes all elements of it"
+  [tree]
+  (tree-map
+    #(map (fn [el] (if-not (sequential? el) (explode-file el) el)) %)
+    tree))
+
+(defn dir->tree
+  "Given a directory name, turns it into a duffel tree"
+  [dir]
+  (-> dir create-dir-tree explode-tree))
+
