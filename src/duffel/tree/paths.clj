@@ -29,18 +29,18 @@
   "Goes through a duffel tree and fills all absolute paths for both dir-maps and
   file-maps. The absolute paths are chrooted such that the root of the tree's
   abs-path is the given chroot, and all children follow from that"
-  [dtree root]
+  [app dtree]
   (tree-map
     (fn [dt]
       (tree-contents-map #(set-path % :abs-path (tree-get dt :abs-path)) dt))
-    (tree-assoc dtree :abs-path (try-append-slash root))))
+    (tree-assoc dtree :abs-path (try-append-slash (app :chroot)))))
 
 (defn fill-paths
   "Goes through a duffel tree and fills all rel and abs paths using
   fill-relpaths and fill-abspaths. root is passed through to fill-abspaths"
-  [dtree root]
-  (-> dtree
-    (fill-abspaths root)
+  [app dtree]
+  (->> dtree
+    (fill-abspaths app)
     (fill-relpaths)))
 
 (comment
@@ -51,5 +51,5 @@
     (fill-relpaths (dir->tree "my-duffel")))
 
   (pprint
-    (fill-paths (dir->tree "my-duffel") "/tmp/duffel-test"))
+    (fill-paths {:chroot "/tmp/duffel-test"} (dir->tree "my-duffel")))
 )

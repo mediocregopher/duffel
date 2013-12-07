@@ -13,8 +13,8 @@
 (defn hostname-matches [hostname]
   (= my-hostname hostname))
 
-(defn groupname-matches [proj-root groupname]
-  (is-in-group? proj-root groupname))
+(defn groupname-matches [app groupname]
+  (is-in-group? app groupname))
 
 (defn- thread-until [init & fns]
   "Runs each fn on init until one of them doesn't return nil, and returns that
@@ -45,18 +45,18 @@
 (defn specified-entry
   "Given a sequence containing dir-maps or file-maps, returns the most specific
   one for this node, or nil if none of them match"
-  [proj-root dirfile-maps]
+  [app dirfile-maps]
   (thread-until dirfile-maps
-    (partial matches-when #(fdqn-matches                (df-spec %)))
-    (partial matches-when #(hostname-matches            (df-spec %)))
-    (partial matches-when #(groupname-matches proj-root (df-spec %)))
-    (partial matches-when #(= "_default"                (df-spec %)))))
+    (partial matches-when #(fdqn-matches          (df-spec %)))
+    (partial matches-when #(hostname-matches      (df-spec %)))
+    (partial matches-when #(groupname-matches app (df-spec %)))
+    (partial matches-when #(= "_default"          (df-spec %)))))
 
 (defn narrow-dirfiles
   "Given a sequence containing dir-maps or file-maps, groups them all together
   based on their real names and narrows the groups down to the proper one, or
   removes if none in the group are proper"
-  [proj-root dirfile-maps]
+  [app dirfile-maps]
   (->> dirfile-maps
     (reduce
       #(let [rname (df-rname %2)
@@ -65,7 +65,7 @@
       {})
     (reduce
       (fn [ret [rname rname-seq]]
-        (if-let [specd (specified-entry proj-root rname-seq)]
+        (if-let [specd (specified-entry app rname-seq)]
           (cons specd ret)
           ret))
       '())))
@@ -74,16 +74,15 @@
   "Given a duffel tree, goes through all of its branches, grouping together
   files with the same real names and keeping the ones with the most specific
   specifiers"
-  [proj-root dtree]
+  [app dtree]
   (tree-map
-    #(cons (first %) (narrow-dirfiles proj-root (rest %)))
+    #(cons (first %) (narrow-dirfiles app (rest %)))
     dtree))
-
 
 (comment
   (require '[clojure.pprint :refer [pprint]])
   (require '[duffel.tree.core :refer [dir->tree]])
 
   (pprint
-    (specify-tree "my-duffel" (dir->tree "my-duffel")))
+    (specify-tree {:proj-root "my-duffel"} (dir->tree "my-duffel")))
 )
