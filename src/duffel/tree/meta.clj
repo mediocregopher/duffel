@@ -76,7 +76,7 @@
     (fn [dt]
       (let [[meta-file dt-rest] (pluck-meta dt)]
         (if (nil? meta-file) dt
-          (meta-onto-files dt-rest
+          (meta-onto-branch dt-rest
             (read-meta-file meta-file)))))
     dtree))
 
