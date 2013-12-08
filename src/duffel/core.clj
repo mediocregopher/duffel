@@ -62,7 +62,7 @@
     (process-app app)
     (println "duffel run complete!")
     nil
-  (catch Exception e (.printStackTrace e) (System/exit 1))))
+  (catch Exception e (.printStackTrace e) (flush) (System/exit 1))))
 
 (def cli-help "A simple resource deployment tool. Check the docs at
 https://github.com/mediocregopher/duffel for more details\n\nUsage: duffel
@@ -77,15 +77,14 @@ https://github.com/mediocregopher/duffel for more details\n\nUsage: duffel
      [ backup-count "Number of backup files to keep" "3" ]
      remaining]
     (if-let [dir (first remaining)]
-      (do
-        (run { :proj-root (if-not (= (last dir) \/) (str dir "/") dir)
-               :chroot chroot
-               :no-backup no-backup?
-               :backup-dir backup-directory
-               :backup-count (str->int backup-count) }
-        (System/exit 0)))
+      (run { :proj-root (if-not (= (last dir) \/) (str dir "/") dir)
+             :chroot chroot
+             :no-backup no-backup?
+             :backup-dir backup-directory
+             :backup-count (str->int backup-count) })
       (binding [*out* *err*]
           (println "A duffel directory must be specified")
+          (flush)
           (System/exit 1)))))
 
 (comment
