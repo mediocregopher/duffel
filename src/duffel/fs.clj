@@ -64,7 +64,7 @@
 (defn cp
     "Calls cp <src> <dst>"
     [src dst]
-    (exec "cp" src dst))
+    (exec "cp" "-r" src dst))
 
 (defn lns
     "Calls ln -s <src> <dst>"

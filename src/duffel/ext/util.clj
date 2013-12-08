@@ -15,7 +15,7 @@
 (defn meta-get
   "Same as tree-get, but automatically descends down into the meta key"
   [el k & default]
-  (apply meta-get-in el k default))
+  (apply meta-get-in el [k] default))
 
 (defn file-filled-perms
   "Given a file-map, returns the owner, group, and chmod specified by its
@@ -127,9 +127,9 @@
   [app abs]
   (when-not (app :no-backup)
     (let [ [abs-dir filename] (rest (re-find #"(.+?)([^\/]*)$" abs)) ]
-        (backup-file
-          abs-dir
-          filename
-          (app :backup-dir)
-          (app :backup-count)))))
+      (backup-file
+        abs-dir
+        filename
+        (app :backup-dir)
+        (app :backup-count)))))
 

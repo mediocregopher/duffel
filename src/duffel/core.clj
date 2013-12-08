@@ -22,6 +22,7 @@
   "Given the app and either a duffel tree or a file-map, runs that items chosen
   extension on it, returning the result"
   [app el]
+  ;(println "process-el" (tree-get el :rel-path))
   (if-let [ext-impl (get-impl (tree-get el :extension))]
     (if (sequential? el)
       (process-dir ext-impl app el)
@@ -32,24 +33,33 @@
   "Processes all extensions on a duffel tree"
   [app dtree]
   (tree-map
-    #(cons
-      (process-el app (first dtree))
-      (map (partial process-el app) (rest dtree)))
+    #(let [new-dt (process-el app %)]
+      (cons
+        (first new-dt)
+        (map
+          (fn [el] (if-not (sequential? el) (process-el app el) el))
+          (rest new-dt))))
     dtree))
 
-(defn run
+(defn process-app
   "Runs the app itself, taking in the app map. It will create the duffel tree
   for this project, process it, and handle all extensions"
   [app]
+  (doall*
+    (->> (dir->tree (str (app :proj-root) "root/"))
+         (fill-paths app)
+         (specify-tree app)
+         (collapse-meta)
+         (cascade-meta)
+         (process-exts app))))
+
+(defn run
+  "Wrapper around processesing the app which catches exceptions and exits the
+  program"
+  [app]
   (try
     (println "starting duffel run")
-    (doall*
-      (->> (dir->tree (str (app :proj-root) "/root/"))
-           (fill-paths app)
-           (specify-tree app)
-           (collapse-meta)
-           (cascade-meta)
-           (process-exts app)))
+    (process-app app)
     (println "duffel run complete!")
     nil
   (catch Exception e (.printStackTrace e) (System/exit 1))))
@@ -77,3 +87,15 @@ https://github.com/mediocregopher/duffel for more details\n\nUsage: duffel
       (binding [*out* *err*]
           (println "A duffel directory must be specified")
           (System/exit 1)))))
+
+(comment
+  (require '[clojure.pprint :refer [pprint]])
+  (pprint
+    (process-app {
+      :proj-root "my-duffel/"
+      :chroot "/tmp/duftest"
+      :no-backup false
+      :backup-dir "/tmp/duftest/bak"
+      :backup-count 3
+    }))
+)

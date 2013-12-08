@@ -11,19 +11,23 @@
   (if-not (= (last dir) \/) (str dir "/") dir))
 
 (defn- set-path
-  [el path-type root]
+  [el path-type name-key root]
   (if (sequential? el)
-    (tree-assoc el path-type (str root (tree-get el :real-name) "/"))
-    (tree-assoc el path-type (str root (tree-get el :real-name)))))
+    (tree-assoc el path-type (str root (tree-get el name-key) "/"))
+    (tree-assoc el path-type (str root (tree-get el name-key)))))
 
 (defn fill-relpaths
   "Goes through a duffel tree and fills all relative paths for both dir-maps and
   file-maps"
-  [dtree]
+  [app dtree]
   (tree-map
     (fn [dt]
-      (tree-contents-map #(set-path % :rel-path (tree-get dt :rel-path)) dt))
-    (set-path dtree :rel-path "")))
+      (tree-contents-map
+        #(set-path % :rel-path :orig-name (tree-get dt :rel-path))
+        dt))
+    (-> dtree
+      (set-path :rel-path :orig-name (app :proj-root))
+      (tree-assoc :real-name "/"))))
 
 (defn fill-abspaths
   "Goes through a duffel tree and fills all absolute paths for both dir-maps and
@@ -32,7 +36,9 @@
   [app dtree]
   (tree-map
     (fn [dt]
-      (tree-contents-map #(set-path % :abs-path (tree-get dt :abs-path)) dt))
+      (tree-contents-map
+        #(set-path % :abs-path :real-name (tree-get dt :abs-path))
+        dt))
     (tree-assoc dtree :abs-path (try-append-slash (app :chroot)))))
 
 (defn fill-paths
@@ -41,7 +47,7 @@
   [app dtree]
   (->> dtree
     (fill-abspaths app)
-    (fill-relpaths)))
+    (fill-relpaths app)))
 
 (comment
   (require '[duffel.tree.core :refer :all])
