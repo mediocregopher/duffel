@@ -16,7 +16,7 @@
         (mkdir-p abs)
         (force-perms abs owner group chmod))
 
-      (when (meta-get dtree "delete-untracked")
+      (when (meta-get dtree "delete_untracked")
         (let [present   (set (ls abs))
               tracked   (rest (tree-contents-map #(tree-get % :real-name) dtree))
               untracked (apply disj present tracked)]
