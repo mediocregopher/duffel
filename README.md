@@ -1,5 +1,7 @@
 # duffel
 
+Unpack your files from your repo to your computer.
+
 ## Basic Usage
 
 Duffel is a standalone executable which will automatically deploy a directory
