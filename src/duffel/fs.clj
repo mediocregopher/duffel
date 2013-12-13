@@ -96,16 +96,14 @@
   (= (trim (exec "uname")) "Darwin"))
 
 (defn find-default-group
-  "Chooses the default group as the group of the user's home,
-  or if all else fails uses the username"
+  "Chooses the default group as the group of the user's home, or if all else
+  fails uses the username"
   [username]
   (try
-    (trim
-     (if (darwin?)
-       (exec "stat" "-f" "%Sg" (System/getenv "HOME"))
-       (exec "stat" "-c" "%G" (System/getenv "HOME"))))
+    (trim (exec "id" "-ng"))
     (catch Exception e
-      ;; Fuck it, let's just return the username and pretend this never happened...
+      ;; Fuck it, let's just return the username and pretend this never
+      ;; happened...
       username)))
 
 (defn full-octal
