@@ -24,4 +24,4 @@ fi
 
 echo "Booting up JVM" >&2
 
-java -jar $TARGETDIR/$JARFILE $@
+exec java -jar $TARGETDIR/$JARFILE $@
