@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION=1.0.0
+VERSION=1.1.0
 JARFILE=duffel-$VERSION-standalone.jar
 URL=https://github.com/mediocregopher/duffel/blob/master/$JARFILE?raw=true
 TARGETDIR=~/.duffel
