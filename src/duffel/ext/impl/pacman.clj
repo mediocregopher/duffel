@@ -8,8 +8,18 @@
   (split (slurp file) #"\n"))
 
 (defn- package-installed?
+  "Returns true if a package is currently installed through pacman, false if
+  not"
   [pac]
-  (try (exec "sudo" "pacman" "-Q" pac) true
+  (try (exec "pacman" "-Q" pac) true
+  (catch Exception _ false)))
+
+(defn- any-from-group-installed?
+  "Returns true if any packages in the given group have been installed, false if
+  not. Ideally the whole group should be checked to see if it's installed, but
+  it's non-trivial to find that out with pacman"
+  [group]
+  (try (exec "pacman" "-Qg" group) true
   (catch Exception _ false)))
 
 (defn- install-packages!
@@ -24,7 +34,8 @@
         pacs (->> all-pacs
                   (remove #(= (first %) \#))
                   (remove empty?)
-                  (remove package-installed?))]
+                  (remove package-installed?)
+                  (remove any-from-group-installed?))]
     (if-not (empty? pacs)
       (apply install-packages! util pacs opts)
       [0 "" ""])))
