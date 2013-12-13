@@ -77,11 +77,14 @@ https://github.com/mediocregopher/duffel for more details\n\nUsage: duffel
      [ backup-count "Number of backup files to keep" "3" ]
      remaining]
     (if-let [dir (first remaining)]
-      (run { :proj-root (if-not (= (last dir) \/) (str dir "/") dir)
-             :chroot chroot
-             :no-backup no-backup?
-             :backup-dir backup-directory
-             :backup-count (str->int backup-count) })
+      (do
+        (run { :proj-root (if-not (= (last dir) \/) (str dir "/") dir)
+               :chroot chroot
+               :no-backup no-backup?
+               :backup-dir backup-directory
+               :backup-count (str->int backup-count) })
+        (flush)
+        (System/exit 0))
       (binding [*out* *err*]
           (println "A duffel directory must be specified")
           (flush)
