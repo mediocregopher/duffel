@@ -65,7 +65,7 @@
         el-seq-rest (map #(meta-onto-file % meta-filtered) (rest dtree))
         el-root (if-let [m (meta ".")]
                   (assoc (first dtree) :meta m)
-                  (meta-onto-file (first dtree) meta))]
+                  (first dtree))]
     (cons el-root el-seq-rest)))
 
 (defn collapse-meta
